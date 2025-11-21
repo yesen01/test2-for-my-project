@@ -18,17 +18,39 @@ class AuthManager extends Controller
         return view('Registration');
     }
 
-    function LoginPost(Request $req)
-    {
-        $req->validate([
-            'email'=>'required',
-            'password'=>'required'
-        ]);
-        $credentials = $req->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            return redirect()->intended(route('home'));
+    function LoginPost(Request $req) {
+    $req->validate([
+        'email'=>'required|email',
+        'password'=>'required'
+    ]);
+
+    // أولاً نشوف هل الايميل موجود في قاعدة البيانات
+    $user = User::where('email', $req->email)->first();
+
+    if (!$user) {
+        // الايميل مش موجود
+        return redirect()->route('login')->with('error', '   uncroect email ');
     }
-    return redirect(route('login'))-> with('error', 'Login details are not valid');
+
+    // تحقق من الباسورد
+    if (!Hash::check($req->password, $user->password)) {
+        return redirect()->route('login')->with('error', 'uncroect password ');
+    }
+
+    // تسجيل الدخول
+    Auth::login($user);
+
+    // توجيه حسب role
+    if ($user->role == 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+    if ($user->role == 'reception') {
+        return redirect()->route('reception.dashboard');
+    }
+    return redirect()->route('patient.dashboard');
+
+
+
     }
 
     function RegistrationPost(Request $req)
@@ -41,6 +63,8 @@ class AuthManager extends Controller
         $data['name']= $req->name;
         $data['email']= $req->email;
         $data['password']= Hash::make($req->password);
+        $data['role'] = 'patient';
+
 
         $user = User::create($data);
 

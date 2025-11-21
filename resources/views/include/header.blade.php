@@ -1,79 +1,78 @@
 <header class="main-header">
     <div class="logo">
-        <a href="/" class="logo-link">Kayan Dental Clinic</a>
+        <h1>عيادة كيان لطب الأسنان</h1>
+    <p>أفضل رعاية صحية لأسنانك</p>
     </div>
 
-    <nav class="nav-links">
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        <a href="/services">Services</a>
-        <a href="/contact">Contact</a>
+    <nav>
 
-        @auth
-            <a href="{{ route('Logout') }}">Logout</a>
-        @endauth
+         <a href="#services">خدماتنا</a>
+    <a href="#team">الفريق الطبي</a>
+    <a href="#contact">اتصل بنا</a>
+      @auth
+        <a href="{{ route('Logout') }}">تسجيل خروج </a>
+    @endauth
 
-        @guest
-            <a href="{{ route('Login') }}">Login</a>
-        @endguest
-    </nav>
+    @guest
+        <a href="{{ route('Registration') }}">تسجيل دخول</a>
+    @endguest
+</nav>
 </header>
 
 <style>
+
+    nav { display:flex; justify-content:center; background-color:#023e8a; padding:10px 0; }
+        nav a { color:white; text-decoration:none; margin:0 15px; font-weight:bold; }
+        nav a:hover { text-decoration: underline; }
     * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
     }
 
+    /* الهيدر المثبّت فوق */
     .main-header {
         width: 100%;
-        background: #3490dc;
-        padding: 20px 40px;
+        background: #023e8a;
+        padding: 20px 50px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        max-width: 100%;
-        overflow: hidden;
+        border-bottom: 3px solid #2779bd;
+
+        position: fixed;   /* 👈 أهم سطر */
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    /* باش المحتوى ما يتغطّاش بالهيدر */
+    body {
+        padding-top: 90px; /* 👈 عدّلها حسب حجم الهيدر */
     }
 
     .logo-link {
         color: white;
         text-decoration: none;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: bold;
         white-space: nowrap;
     }
 
     .nav-links {
         display: flex;
-        flex-wrap: wrap;
-        gap: 40px; /* المسافة بين جميع الروابط */
+        gap: 50px;
     }
 
     .nav-links a {
         color: white;
+        font-size: 18px;
         text-decoration: none;
-        font-size: 16px;
-        white-space: nowrap;
+        font-weight: 500;
+        transition: 0.3s;
     }
 
     .nav-links a:hover {
-        text-decoration: underline;
-    }
-
-    /* للهواتف */
-    @media (max-width: 600px) {
-        .main-header {
-            flex-direction: column;
-            gap: 10px;
-            text-align: center;
-            padding: 10px 20px;
-        }
-
-        .nav-links {
-            gap: 15px; /* المسافة بين الروابط أصغر على الهواتف */
-            flex-direction: column;
-        }
+        opacity: 0.8;
     }
 </style>
