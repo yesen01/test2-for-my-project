@@ -15,7 +15,7 @@
         nav a { color:white; text-decoration:none; margin:0 15px; font-weight:bold; }
         nav a:hover { text-decoration: underline; }
         .hero { text-align:center; padding:60px 20px;
-                background-image:url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80');
+                background-image:url('https://images.unsplash.com/photo-1588776814546-859414a0f3f0');
                 background-size:cover; background-position:center; color:white; }
         .hero h1 { font-size:48px; margin-bottom:20px; }
         .hero p { font-size:20px; }
@@ -31,11 +31,15 @@
 <body>
 
 <header>
-    <h1>   </h1>
-    <p>   </p>
+    <h1>عيادة كيان لطب الأسنان</h1>
+    <p>أفضل رعاية صحية لأسنانك</p>
 </header>
 
-
+<nav>
+    <a href="#services">خدماتنا</a>
+    <a href="#team">الفريق الطبي</a>
+    <a href="#contact">اتصل بنا</a>
+</nav>
 
 <!-- Hero Section -->
 <section class="hero">

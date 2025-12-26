@@ -15,10 +15,10 @@ class AuthManager extends Controller
     }
     function registration()
     {
-        return view('Registration');
+        return view('registration');
     }
 
-    function LoginPost(Request $req) {
+    function loginPost(Request $req) {
     $req->validate([
         'email'=>'required|email',
         'password'=>'required'
@@ -41,13 +41,17 @@ class AuthManager extends Controller
     Auth::login($user);
 
     // توجيه حسب role
-    if ($user->role == 'admin') {
+    switch ($user->role) {
+    case 'admin':
         return redirect()->route('admin.dashboard');
-    }
-    if ($user->role == 'reception') {
+
+    case 'reception':
         return redirect()->route('reception.dashboard');
-    }
-    return redirect()->route('patient.dashboard');
+
+    default:
+        return redirect()->route('patient.dashboard');
+}
+
 
 
 
@@ -56,24 +60,34 @@ class AuthManager extends Controller
     function RegistrationPost(Request $req)
     {
         $req->validate([
-            'name'=>'required',
-            'email'=>'required|email|unique:users',
-            'password'=>'required'
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|confirmed'
         ]);
-        $data['name']= $req->name;
-        $data['email']= $req->email;
-        $data['password']= Hash::make($req->password);
-        $data['role'] = 'patient';
 
+        $data['name'] = $req->name;
+        $data['email'] = $req->email;
+        $data['password'] = Hash::make($req->password);
+        $data['role'] = 'patient';
 
         $user = User::create($data);
 
-        if (!$user) {
-            return redirect(route('Registration'))-> with('error', 'resgistration failf, try again');
+        if (! $user) {
+            if ($req->expectsJson()) {
+                return response()->json(['message' => 'Registration failed'], 500);
+            }
+            return redirect()->route('registration')->with('error', 'Registration failed, try again');
         }
-            return redirect(route('login'))-> with('success', 'You have registered successfully');
 
+        // If request expects JSON (AJAX), return JSON response
+        if ($req->expectsJson()) {
+            return response()->json([
+                'message' => 'You have registered successfully',
+                'token' => null,
+            ], 201);
+        }
 
+        return redirect()->route('login')->with('success', 'You have registered successfully');
     }
 
     function logout()
