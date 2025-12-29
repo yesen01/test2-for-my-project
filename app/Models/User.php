@@ -51,4 +51,10 @@ class User extends Authenticatable
         return $this->hasMany(Appointment::class);
     }
 
+    // Latest appointment (convenience relation)
+    public function latestAppointment()
+    {
+        return $this->hasOne(\App\Models\Appointment::class)->latestOfMany();
+    }
+
 }

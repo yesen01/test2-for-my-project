@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class Appointment extends Model
 {
     protected $fillable = [
-        'user_id','doctor_id','date','time','notes','status'
+        'user_id','doctor_id','doctor_slot_id','date','time','notes','status'
     ];
 
     protected $dates = ['date'];
@@ -21,7 +21,12 @@ class Appointment extends Model
 
     public function doctor(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'doctor_id');
+        return $this->belongsTo(\App\Models\Doctor::class, 'doctor_id');
+    }
+
+    public function doctorSlot(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\DoctorSlot::class, 'doctor_slot_id');
     }
 
     // حالة محسوبة تلقائياً للاعرض فقط (computed status)

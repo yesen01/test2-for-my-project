@@ -1,0 +1,53 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('doctor_slots', function (Blueprint $table) {
+            if (!Schema::hasColumn('doctor_slots', 'day_of_week')) {
+                $table->tinyInteger('day_of_week')->nullable()->after('doctor_id')->comment('0=Sun..6=Sat');
+            }
+
+            if (!Schema::hasColumn('doctor_slots', 'start_time')) {
+                $table->time('start_time')->nullable()->after('day_of_week');
+            }
+
+            if (!Schema::hasColumn('doctor_slots', 'end_time')) {
+                $table->time('end_time')->nullable()->after('start_time');
+            }
+
+            if (Schema::hasColumn('doctor_slots', 'capacity')) {
+                $table->dropColumn('capacity');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('doctor_slots', function (Blueprint $table) {
+            if (Schema::hasColumn('doctor_slots', 'day_of_week')) {
+                $table->dropColumn('day_of_week');
+            }
+            if (Schema::hasColumn('doctor_slots', 'start_time')) {
+                $table->dropColumn('start_time');
+            }
+            if (Schema::hasColumn('doctor_slots', 'end_time')) {
+                $table->dropColumn('end_time');
+            }
+            if (!Schema::hasColumn('doctor_slots', 'capacity')) {
+                $table->unsignedInteger('capacity')->default(1)->after('end_at');
+            }
+        });
+    }
+};

@@ -25,20 +25,29 @@ Route::middleware(['auth', AdminMiddleware::class])
         })->name('departments.index');
 
         Route::get('/doctors', function () {
-            return view('admin.doctors.index');
+            $doctors = \App\Models\Doctor::all();
+            return view('admin.doctors.index', compact('doctors'));
         })->name('doctors.index');
 
-        Route::get('/patients', function () {
-            return view('admin.patients.index');
-        })->name('patients.index');
+        // Admin doctors actions
+        Route::post('/doctors', [\App\Http\Controllers\Admin\AdminDoctorController::class, 'store'])->name('doctors.store');
+        Route::delete('/doctors/{doctor}', [\App\Http\Controllers\Admin\AdminDoctorController::class, 'destroy'])->name('doctors.destroy');
+        Route::get('/doctors/{doctor}/slots', [\App\Http\Controllers\Admin\AdminDoctorSlotController::class, 'index'])->name('doctors.slots.index');
+        Route::post('/doctors/{doctor}/slots', [\App\Http\Controllers\Admin\AdminDoctorSlotController::class, 'store'])->name('doctors.slots.store');
+        Route::delete('/slots/{slot}', [\App\Http\Controllers\Admin\AdminDoctorSlotController::class, 'destroy'])->name('doctors.slots.destroy');
 
-        Route::get('/appointments', function () {
-            return view('admin.appointments.index');
-        })->name('appointments.index');
+        Route::get('/patients', [\App\Http\Controllers\Admin\AdminPatientController::class, 'index'])->name('patients.index');
+        Route::delete('/patients/{patient}', [\App\Http\Controllers\Admin\AdminPatientController::class, 'destroy'])->name('patients.destroy');
 
-        Route::get('/schedule', function () {
-            return view('admin.schedule.index');
-        })->name('schedule.index');
+        Route::get('/appointments', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'index'])->name('appointments.index');
+        Route::get('/appointments/doctor/{doctor}/available', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'available'])->name('appointments.doctor.available');
+        Route::post('/appointments/admin/store', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'store'])->name('appointments.admin.store');
+        Route::post('/appointments/{appointment}/approve', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'approve'])->name('appointments.approve');
+        Route::post('/appointments/{appointment}/cancel', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'cancel'])->name('appointments.cancel');
+        Route::delete('/appointments/{appointment}', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'destroy'])->name('appointments.destroy');
+
+        Route::get('/schedule', [\App\Http\Controllers\Admin\AdminScheduleController::class, 'index'])->name('schedule.index');
+        Route::post('/schedule/{doctor}/toggle', [\App\Http\Controllers\Admin\AdminScheduleController::class, 'toggle'])->name('schedule.toggle');
 
     });
 
@@ -119,6 +128,13 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/doctor-times/{doctor}', [DoctorController::class, 'times']);
+
+// Patient doctor listing and show
+Route::get('/doctors', [\App\Http\Controllers\DoctorController::class, 'index'])->name('patient.doctors.index');
+Route::get('/doctors/{doctor}', [\App\Http\Controllers\DoctorController::class, 'show'])->name('patient.doctors.show');
+
+// Appointment booking by slot
+Route::post('/appointments', [\App\Http\Controllers\AppointmentController::class, 'store'])->name('appointments.store')->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------

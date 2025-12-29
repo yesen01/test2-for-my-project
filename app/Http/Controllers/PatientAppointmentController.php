@@ -16,13 +16,10 @@ class PatientAppointmentController extends Controller
             ->appointments()
             ->orderBy('date','asc')
             ->get();
-
-        $doctors = Doctor::all();
+        // eager load slots for the dashboard to avoid N+1 when rendering availability
+        $doctors = Doctor::with('doctorSlots')->get();
 
         return view('patient.dashboard', compact('appointments','doctors'));
-        $appointments = auth()->user()->appointments()->orderBy('date','asc')->get();
-
-        return view('patient.appointments.index', compact('appointments'));
     }
 
     // حفظ موعد جديد
@@ -30,13 +27,38 @@ class PatientAppointmentController extends Controller
     {
         $request->validate([
             'doctor_id' => 'required|exists:doctors,id',
-            'date'      => 'required|date|after_or_equal:today',
+            'day'       => 'nullable|integer|min:0|max:6',
             'time'      => 'required|string',
         ]);
 
-        Auth::user()->appointments()->create(
-            $request->only(['date','time','notes','doctor_id'])
-        );
+        // if a weekday was chosen, compute the next calendar date for that weekday
+        $date = null;
+        if ($request->filled('day')) {
+            $day = (int) $request->input('day');
+            $today = \Carbon\Carbon::now();
+            $candidate = $today->copy()->startOfDay();
+            $daysToAdd = ($day - $candidate->dayOfWeek + 7) % 7;
+
+            // if the chosen day is today, ensure the chosen time is in the future
+            if ($daysToAdd === 0) {
+                $chosenTime = \Carbon\Carbon::createFromFormat('H:i', $request->input('time'));
+                $nowTime = \Carbon\Carbon::now();
+                $chosenDateTime = $candidate->copy()->setTimeFromTimeString($request->input('time'));
+                if ($chosenDateTime->lte($nowTime)) {
+                    $daysToAdd = 7; // schedule next week
+                }
+            }
+
+            $date = $candidate->addDays($daysToAdd)->toDateString();
+        }
+
+        // if date computed or provided, create appointment
+        Auth::user()->appointments()->create([
+            'doctor_id' => $request->input('doctor_id'),
+            'date' => $date ?? $request->input('date'),
+            'time' => $request->input('time'),
+            'notes' => $request->input('notes'),
+        ]);
 
         return redirect()->back()->with('success', 'تم حجز الموعد بنجاح!');
     }

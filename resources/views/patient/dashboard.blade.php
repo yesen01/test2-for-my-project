@@ -143,9 +143,11 @@ width:100%;
             </div>
 
             <div class="form-row">
-                <label for="date">التاريخ</label>
-                <input id="date" type="date" name="date" min="{{ $nowDate }}" value="{{ old('date') }}" required>
-                @error('date')<div class="error-text">{{ $message }}</div>@enderror
+                <label for="day">اليوم (أيام توافر الطبيب)</label>
+                <select id="day" name="day" required>
+                    <option value="">اختر الطبيب أولاً</option>
+                </select>
+                @error('day')<div class="error-text">{{ $message }}</div>@enderror
             </div>
 
             <div class="form-row">
@@ -164,9 +166,7 @@ width:100%;
             <div class="form-row">
                 <label for="time">الوقت</label>
                 <select id="time" name="time" required>
-                    @foreach(['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'] as $t)
-                        <option value="{{ $t }}" {{ old('time') == $t ? 'selected' : '' }}>{{ $t }}</option>
-                    @endforeach
+                    <option value="">اختر اليوم أولاً</option>
                 </select>
                 @error('time')<div class="error-text">{{ $message }}</div>@enderror
             </div>
@@ -196,6 +196,130 @@ function toggleMenu(force){
     menu.setAttribute('aria-hidden', open ? 'false' : 'true');
 }
 document.getElementById('menuBtn').addEventListener('click',()=>toggleMenu());
+</script>
+
+@php
+    $availability = [];
+    foreach($doctors as $d) {
+        foreach($d->doctorSlots->whereNotNull('day_of_week') as $s) {
+            $availability[$d->id][$s->day_of_week][] = [
+                'start' => $s->start_time,
+                'end' => $s->end_time,
+            ];
+        }
+    }
+    $oldDoctor = old('doctor_id', '');
+    $oldDay = old('day', '');
+    $oldTime = old('time', '');
+@endphp
+
+<script>
+    (function(){
+        const daysOrder = [6,0,1,2,3,4,5];
+        const dayLabels = {0:'الأحد',1:'الإثنين',2:'الثلاثاء',3:'الأربعاء',4:'الخميس',5:'الجمعة',6:'السبت'};
+        const availability = @json($availability);
+        const stepMinutes = 60; // 60 minutes -> hourly slots
+
+        const doctorSel = document.getElementById('doctor_id');
+        const daySel = document.getElementById('day');
+        const timeSel = document.getElementById('time');
+
+        function clearSelect(sel, placeholder){
+            sel.innerHTML = '';
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = placeholder;
+            sel.appendChild(opt);
+        }
+
+        function formatRanges(ranges){
+            return ranges.map(r => r.start + (r.end ? (' - ' + r.end) : '')).join(', ');
+        }
+
+        function timesBetween(start, end, step){
+            // produce hourly times (or step-based) between rounded start (up) and end (down)
+            if (!start) return [];
+            const toMinutes = s => {
+                const [hh, mm] = s.split(':').map(Number);
+                return hh * 60 + mm;
+            };
+            const toHHMM = m => {
+                const hh = String(Math.floor(m/60)).padStart(2,'0');
+                const mm = String(m%60).padStart(2,'0');
+                return hh + ':' + mm;
+            };
+
+            const startM = toMinutes(start);
+            if (!end) {
+                const roundedStart = Math.ceil(startM / 60) * 60;
+                return [toHHMM(roundedStart)];
+            }
+
+            const endM = toMinutes(end);
+            const startHour = Math.ceil(startM / 60) * 60; // round up to next full hour
+            const endHour = Math.floor(endM / 60) * 60;   // round down to full hour
+            const res = [];
+            if (startHour > endHour) return res;
+            for (let t = startHour; t <= endHour; t += step) {
+                res.push(toHHMM(t));
+            }
+            return res;
+        }
+
+        function populateDays(docId){
+            clearSelect(daySel, 'اختر اليوم');
+            clearSelect(timeSel, 'اختر اليوم أولاً');
+            const avail = availability[docId] || {};
+            daysOrder.forEach(dow => {
+                if (!avail[dow]) return;
+                const opt = document.createElement('option');
+                opt.value = dow;
+                opt.textContent = dayLabels[dow] + ' — ' + formatRanges(avail[dow]);
+                daySel.appendChild(opt);
+            });
+        }
+
+        function populateTimes(docId, dow){
+            clearSelect(timeSel, 'اختر وقتاً');
+            const ranges = (availability[docId] || {})[dow] || [];
+            const added = new Set();
+            ranges.forEach(r => {
+                const list = timesBetween(r.start, r.end, stepMinutes);
+                list.forEach(t => {
+                    if (added.has(t)) return;
+                    added.add(t);
+                    const opt = document.createElement('option');
+                    opt.value = t;
+                    opt.textContent = t;
+                    timeSel.appendChild(opt);
+                });
+            });
+        }
+
+        doctorSel.addEventListener('change', function(){
+            if (!this.value) { clearSelect(daySel, 'اختر الطبيب أولاً'); clearSelect(timeSel,'اختر اليوم أولاً'); return; }
+            populateDays(this.value);
+        });
+
+        daySel.addEventListener('change', function(){
+            const docId = doctorSel.value;
+            if (!docId || !this.value) { clearSelect(timeSel, 'اختر اليوم أولاً'); return; }
+            populateTimes(docId, this.value);
+        });
+
+        const oldDoctor = '{{ $oldDoctor }}';
+        const oldDay = '{{ $oldDay }}';
+        const oldTime = '{{ $oldTime }}';
+        if (oldDoctor) {
+            doctorSel.value = oldDoctor;
+            populateDays(oldDoctor);
+            if (oldDay) {
+                daySel.value = oldDay;
+                populateTimes(oldDoctor, oldDay);
+                if (oldTime) timeSel.value = oldTime;
+            }
+        }
+    })();
 </script>
 
 </body>

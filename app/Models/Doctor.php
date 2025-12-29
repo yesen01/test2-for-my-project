@@ -10,4 +10,9 @@ class Doctor extends Model
         'name',
         'available_times'
     ];
+
+    public function doctorSlots()
+    {
+        return $this->hasMany(DoctorSlot::class);
+    }
 }

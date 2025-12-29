@@ -6,22 +6,29 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Appointment;
+use App\Models\Doctor;
 use Illuminate\Support\Facades\Hash;
 
 class AdminDashboardController extends Controller
 {
     public function index()
     {
+        // counts for dashboard cards
+        $doctors = Doctor::count();
+        $patients = User::where('role', 'patient')->count();
+        $appointments = Appointment::count();
+
+        // additional stats (kept for backward compatibility/other widgets)
         $totalUsers = User::count();
-        $totalAppointments = Appointment::count();
         $completedAppointments = Appointment::where('status','completed')->count();
         $noShowAppointments = Appointment::where('status','no_show')->count();
-        $noShowRate = $totalAppointments > 0 ? round(($noShowAppointments / $totalAppointments) * 100,2) : 0;
+        $noShowRate = $appointments > 0 ? round(($noShowAppointments / $appointments) * 100,2) : 0;
 
         $receptionists = User::where('role','reception')->get();
 
         return view('admin.dashboard', compact(
-            'totalUsers', 'totalAppointments', 'completedAppointments', 'noShowRate', 'receptionists'
+            'doctors','patients','appointments',
+            'totalUsers', 'completedAppointments', 'noShowRate', 'receptionists'
         ));
     }
 
