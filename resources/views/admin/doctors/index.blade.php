@@ -60,7 +60,7 @@ body{
 
 <!-- Sidebar -->
 <div class="sidebar">
-    <h4>HealthEase</h4>
+    <h4>مركز كيان لطب وجراحة الاسنان </h4>
 
     <a href="{{ route('admin.dashboard') }}">
         <i class="fa-solid fa-chart-line ms-2"></i> Dashboard
@@ -72,6 +72,11 @@ body{
 
     <a href="{{ route('admin.patients.index') }}">
         <i class="fa-solid fa-user ms-2"></i> المرضى
+    </a>
+
+        <a href="{{ route('admin.receptionists.index') }}" class="{{ request()->routeIs('admin.receptionists.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-users ms-2"></i>
+        موظفو الاستقبال
     </a>
 
     <a href="{{ route('admin.appointments.index') }}">

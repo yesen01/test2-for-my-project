@@ -32,6 +32,31 @@ class AdminDashboardController extends Controller
         ));
     }
 
+    // عرض صفحة إدارة موظفي الاستقبال
+    public function receptionistsIndex()
+    {
+        $receptionists = User::where('role','reception')->get();
+
+        // dashboard counts to show on receptionists page
+        $doctors = \App\Models\Doctor::count();
+        $patients = User::where('role', 'patient')->count();
+        $appointments = \App\Models\Appointment::count();
+
+        return view('admin.receptionists.index', compact(
+            'receptionists','doctors','patients','appointments'
+        ));
+    }
+
+    // عرض لوحة الاستقبال بنفس البيانات التي تعرض للأدمن
+    public function receptionDashboard()
+    {
+        $doctors = Doctor::count();
+        $patients = User::where('role', 'patient')->count();
+        $appointments = Appointment::count();
+
+        return view('reception.dashboard', compact('doctors','patients','appointments'));
+    }
+
     // إضافة Receptionist جديد
     public function addReceptionist(Request $request)
     {

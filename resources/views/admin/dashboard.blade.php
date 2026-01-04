@@ -13,17 +13,19 @@ body{
     background:#f4f6f9;
     overflow-x:hidden;
     font-family:Tahoma, sans-serif;
+    margin:0;
 }
 
 /* Sidebar */
 .sidebar{
     width:250px;
-    min-height:100vh;
+    height:100vh;
     background:#0f766e;
     color:#fff;
     position:fixed;
     top:0;
     right:0;
+    z-index:1000;
 }
 .sidebar h4{
     padding:20px;
@@ -47,10 +49,17 @@ body{
     background:rgba(255,255,255,.15);
 }
 
-/* Content */
+/* Main Content */
 .main-content{
     margin-right:250px;
-    padding:25px;
+    min-height:100vh;
+    padding:30px;
+}
+
+/* Fix Bootstrap row RTL overlap */
+.main-content .row{
+    margin-right:0;
+    margin-left:0;
 }
 
 /* Cards */
@@ -76,7 +85,7 @@ body{
 
 <!-- Sidebar -->
 <div class="sidebar">
-    <h4>HealthEase</h4>
+    <h4>مركز كيان لطب وجراحة الاسنان </h4>
 
     <a href="{{ route('admin.dashboard') }}"
        class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -94,6 +103,12 @@ body{
        class="{{ request()->routeIs('admin.patients.*') ? 'active' : '' }}">
         <i class="fa-solid fa-user ms-2"></i>
         المرضى
+    </a>
+
+    <a href="{{ route('admin.receptionists.index') }}"
+       class="{{ request()->routeIs('admin.receptionists.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-users ms-2"></i>
+        موظفو الاستقبال
     </a>
 
     <a href="{{ route('admin.appointments.index') }}"
@@ -124,9 +139,9 @@ body{
         مرحباً، {{ auth()->user()->name }}
     </h4>
 
+
+
     <div class="row g-4">
-
-
 
         <!-- Doctors -->
         <div class="col-xl-3 col-md-6">
@@ -175,7 +190,10 @@ body{
 
     </div>
 
+
+
 </div>
 
 </body>
 </html>
+

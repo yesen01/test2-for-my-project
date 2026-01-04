@@ -117,5 +117,18 @@ class PatientAppointmentController extends Controller
     return redirect()->back()->with('success', 'تم تحديث الموعد بنجاح');
 }
 
+    // Patient accepts a rescheduled appointment proposed by admin
+    public function acceptReschedule(Appointment $appointment)
+    {
+        if ($appointment->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // mark as confirmed
+        $appointment->update(['status' => 'confirmed']);
+
+        return redirect()->back()->with('success', 'تم قبول الموعد المعدل.');
+    }
+
 
 }

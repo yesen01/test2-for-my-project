@@ -1,7 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
-
+namespace App\Http\Controllers\Receptionists;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Appointment;
@@ -11,9 +10,9 @@ use App\Models\User;
 use App\Jobs\SendAppointmentReminder;
 use Carbon\Carbon;
 
-class AdminAppointmentController extends Controller
+class ReceptionistsAppointmentController extends Controller
 {
-    // list all appointments and doctors for admin
+    // list all appointments and doctors for receptionist
     public function index()
     {
         $appointments = Appointment::with(['user','doctor'])->orderBy('date','desc')->get();
@@ -21,7 +20,7 @@ class AdminAppointmentController extends Controller
 
         $patients = User::where('role', 'patient')->get();
 
-        return view('admin.appointments.index', compact('appointments','doctors','patients'));
+        return view('receptionists.appointments.index', compact('appointments','doctors','patients'));
     }
 
     // return available upcoming dates/times for a doctor (JSON)
@@ -65,7 +64,7 @@ class AdminAppointmentController extends Controller
         return response()->json($days);
     }
 
-    // Admin books on behalf of a patient
+    // Receptionist books on behalf of a patient
     public function store(Request $request)
     {
         $request->validate([
@@ -104,14 +103,14 @@ class AdminAppointmentController extends Controller
         return redirect()->back()->with('success', 'Appointment approved.');
     }
 
-    // Show edit form for an appointment (admin)
+    // Show edit form for an appointment (receptionist)
     public function edit(Appointment $appointment)
     {
         $appointment->load(['user','doctor']);
-        return view('admin.appointments.edit', compact('appointment'));
+        return view('receptionists.appointments.edit', compact('appointment'));
     }
 
-    // Update appointment time/date by admin and mark as rescheduled
+    // Update appointment time/date by receptionist and mark as rescheduled
     public function update(Request $request, Appointment $appointment)
     {
         $request->validate([
@@ -125,7 +124,7 @@ class AdminAppointmentController extends Controller
             'status' => 'rescheduled',
         ]);
 
-        return redirect()->route('admin.appointments.index')->with('success', 'Appointment rescheduled; patient will be notified.');
+        return redirect()->route('receptionists.appointments.index')->with('success', 'Appointment rescheduled; patient will be notified.');
     }
 
     public function cancel(Appointment $appointment)

@@ -74,7 +74,7 @@
 </style>
 
 <div class="container">
-    <h2>Dental Clinic Registration</h2>
+    <h2>تسجيل مركز كايان</h2>
 
     {{-- عرض رسائل النجاح --}}
     @if(session('success'))
@@ -97,15 +97,15 @@
 
     <form action="{{ route('Registration.Post') }}" method="POST">
         @csrf
-        <input type="text" name="name" placeholder="Full Name" required>
-        <input type="email" name="email" placeholder="Email Address" required>
-        <input type="text" name="phone" placeholder="Phone Number" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
-        <button type="submit">Register</button>
+        <input type="text" name="name" placeholder="اسم الكامل" required>
+        <input type="email" name="email" placeholder="البريد الاكتروني" required>
+        <input type="text" name="phone" placeholder="رقم الهاتف" required>
+        <input type="password" name="password" placeholder=" كلمة المرور" required>
+        <input type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور" required>
+        <button type="submit">تسجيل</button>
     </form>
 
-    <p>Already have an account? <a href="{{ url('/login') }}">Login here</a></p>
+    <p>هل لديك حساب بالفعل؟<a href="{{ url('/login') }}">سجل دخولك هنا</a></p>
 
 </div>
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\\Http\\Controllers\\Receptionists;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
+use App\\Http\\Controllers\\Controller;
+use Illuminate\\Http\\Request;
+use App\\Models\\User;
 
-class AdminPatientController extends Controller
+class ReceptionistsPatientController extends Controller
 {
     // List patients (paginated)
     public function index(Request $request)

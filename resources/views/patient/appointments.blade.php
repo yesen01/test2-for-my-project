@@ -173,6 +173,13 @@ background:#f3f4f6;
                 ✏️ تعديل الموعد
             </a>
 
+            @if($appointment->status === 'rescheduled')
+                <form method="POST" action="{{ route('patient.appointments.accept', $appointment) }}" style="margin-top:6px">
+                    @csrf
+                    <button type="submit" class="danger">✅ قبول الموعد المعدل</button>
+                </form>
+            @endif
+
             <!-- إلغاء -->
             <form method="POST"
                   action="{{ route('patient.appointments.destroy', $appointment) }}"

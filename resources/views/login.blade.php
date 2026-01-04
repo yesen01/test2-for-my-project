@@ -48,7 +48,7 @@ button:hover {
 </style>
 
 <div class="form-box">
-    <h2>Login</h2>
+    <h2>تسجيل الدخول</h2>
 
     {{-- عرض رسائل النجاح --}}
     @if(session('success'))
@@ -72,11 +72,11 @@ button:hover {
     <form action="{{ route('login.Post') }}" method="POST">
         @csrf
 
-        <input type="email" name="email" placeholder="Email" required>
+        <input type="email" name="email" placeholder="بريد الاكتروني " required>
 
-        <input type="password" name="password" placeholder="Password" required>
+        <input type="password" name="password" placeholder="كلمة المرور" required>
 
-        <button type="submit">Login</button>
+        <button type="submit">تسجيل الدخول</button>
     </form>
 </div>
 

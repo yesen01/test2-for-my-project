@@ -15,6 +15,8 @@ Route::middleware(['auth', AdminMiddleware::class])
 
         Route::get('/dashboard', [AdminDashboardController::class,'index'])->name('dashboard');
 
+        // Receptionists management page
+        Route::get('/receptionists', [AdminDashboardController::class,'receptionistsIndex'])->name('receptionists.index');
         // Receptionists
         Route::post('/receptionists/add', [AdminDashboardController::class,'addReceptionist'])->name('receptionists.add');
         Route::delete('/receptionists/{user}/delete', [AdminDashboardController::class,'deleteReceptionist'])->name('receptionists.delete');
@@ -40,6 +42,9 @@ Route::middleware(['auth', AdminMiddleware::class])
         Route::delete('/patients/{patient}', [\App\Http\Controllers\Admin\AdminPatientController::class, 'destroy'])->name('patients.destroy');
 
         Route::get('/appointments', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'index'])->name('appointments.index');
+        Route::get('/appointments/{appointment}/edit', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'edit'])->name('appointments.edit');
+        Route::put('/appointments/{appointment}', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'update'])->name('appointments.update');
+        Route::post('/appointments/{appointment}/manual-remind', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'manualRemind'])->name('appointments.manual_remind');
         Route::get('/appointments/doctor/{doctor}/available', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'available'])->name('appointments.doctor.available');
         Route::post('/appointments/admin/store', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'store'])->name('appointments.admin.store');
         Route::post('/appointments/{appointment}/approve', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'approve'])->name('appointments.approve');
@@ -87,9 +92,65 @@ Route::post('/logout', function () {
 */
 
 
-Route::get('/reception/dashboard', function () {
-    return view('reception.dashboard');
-})->name('reception.dashboard')->middleware('auth');
+// Reception area routes (accessible to authenticated reception users)
+Route::middleware('auth')
+    ->prefix('reception')
+    ->name('reception.')
+    ->group(function () {
+
+        // dashboard
+        Route::get('/dashboard', [AdminDashboardController::class, 'receptionDashboard'])
+            ->name('dashboard');
+
+        // basic pages mapped to admin controllers but without Admin middleware
+        Route::get('/doctors', function () {
+            $doctors = \App\Models\Doctor::all();
+            return view('reception.doctors.index', compact('doctors'));
+        })->name('doctors.index');
+
+        Route::get('/patients', [\App\Http\Controllers\Admin\AdminPatientController::class, 'index'])
+            ->name('patients.index');
+
+
+        // allow reception to perform doctor management actions (store/destroy/slots)
+        Route::post('/doctors', [\App\Http\Controllers\Admin\AdminDoctorController::class, 'store'])
+            ->name('doctors.store');
+        Route::delete('/doctors/{doctor}', [\App\Http\Controllers\Admin\AdminDoctorController::class, 'destroy'])
+            ->name('doctors.destroy');
+        Route::get('/doctors/{doctor}/slots', [\App\Http\Controllers\Admin\AdminDoctorSlotController::class, 'index'])
+            ->name('doctors.slots.index');
+        Route::post('/doctors/{doctor}/slots', [\App\Http\Controllers\Admin\AdminDoctorSlotController::class, 'store'])
+            ->name('doctors.slots.store');
+        Route::delete('/slots/{slot}', [\App\Http\Controllers\Admin\AdminDoctorSlotController::class, 'destroy'])
+            ->name('doctors.slots.destroy');
+
+        Route::get('/appointments', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'index'])
+            ->name('appointments.index');
+        Route::get('/appointments/{appointment}/edit', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'edit'])
+            ->name('appointments.edit');
+        Route::put('/appointments/{appointment}', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'update'])
+            ->name('appointments.update');
+        Route::post('/appointments/{appointment}/manual-remind', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'manualRemind'])
+            ->name('appointments.manual_remind');
+        Route::get('/appointments/doctor/{doctor}/available', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'available'])
+            ->name('appointments.doctor.available');
+        Route::post('/appointments/admin/store', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'store'])
+            ->name('appointments.admin.store');
+        Route::post('/appointments/{appointment}/approve', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'approve'])
+            ->name('appointments.approve');
+        Route::post('/appointments/{appointment}/cancel', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'cancel'])
+            ->name('appointments.cancel');
+        Route::delete('/appointments/{appointment}', [\App\Http\Controllers\Admin\AdminAppointmentController::class, 'destroy'])
+            ->name('appointments.destroy');
+
+        // allow reception to delete patients
+        Route::delete('/patients/{patient}', [\App\Http\Controllers\Admin\AdminPatientController::class, 'destroy'])
+            ->name('patients.destroy');
+
+        Route::get('/schedule', [\App\Http\Controllers\Admin\AdminScheduleController::class, 'index'])
+            ->name('schedule.index');
+
+    });
 
 /*
 |--------------------------------------------------------------------------
@@ -120,6 +181,10 @@ Route::middleware('auth')->group(function () {
 
         Route::put('/patient/appointments/{appointment}', [PatientAppointmentController::class, 'update'])
     ->name('patient.appointments.update');
+
+        // patient accepts an admin reschedule
+        Route::post('/patient/appointments/{appointment}/accept', [PatientAppointmentController::class, 'acceptReschedule'])
+            ->name('patient.appointments.accept');
 });
 
 /*

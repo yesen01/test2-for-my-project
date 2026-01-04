@@ -1,26 +1,31 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>إدارة المرضى</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <style>
-    body{font-family:tahoma, sans-serif;padding:18px;background:#f6f7fb}
-    <style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة المرضى</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+<style>
 body{
     background:#f4f6f9;
     overflow-x:hidden;
     font-family:Tahoma, sans-serif;
+    margin:0;
 }
+
+/* Sidebar */
 .sidebar{
     width:250px;
-    min-height:100vh;
+    height:100vh;
     background:#0f766e;
     color:#fff;
     position:fixed;
     top:0;
     right:0;
+    z-index:1000;
 }
 .sidebar h4{
     padding:20px;
@@ -43,22 +48,34 @@ body{
 .sidebar button:hover{
     background:rgba(255,255,255,.15);
 }
+
+/* Main Content */
 .main-content{
     margin-right:250px;
-    padding:25px;
+    padding:30px;
+    min-height:100vh;
 }
+
+/* Fix Bootstrap RTL row */
+.main-content .row{
+    margin-right:0;
+    margin-left:0;
+}
+
+/* Cards */
 .card{
     border-radius:14px;
     border:none;
     box-shadow:0 4px 10px rgba(0,0,0,.05);
 }
 </style>
-    </style>
 </head>
+
 <body>
-    <!-- Sidebar -->
+
+<!-- Sidebar -->
 <div class="sidebar">
-    <h4>HealthEase</h4>
+    <h4>مركز كيان لطب وجراحة الاسنان </h4>
 
     <a href="{{ route('admin.dashboard') }}"
        class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -76,6 +93,11 @@ body{
        class="{{ request()->routeIs('admin.patients.*') ? 'active' : '' }}">
         <i class="fa-solid fa-user ms-2"></i>
         المرضى
+    </a>
+
+        <a href="{{ route('admin.receptionists.index') }}" class="{{ request()->routeIs('admin.receptionists.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-users ms-2"></i>
+        موظفو الاستقبال
     </a>
 
     <a href="{{ route('admin.appointments.index') }}"
@@ -99,15 +121,20 @@ body{
     </form>
 </div>
 
-<div class="container">
+<!-- Main Content -->
+<div class="main-content">
+
     <h3 class="mb-4">المرضى</h3>
 
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
     @endif
 
     <div class="card">
         <div class="card-body">
+
             <div class="table-responsive">
                 <table class="table table-striped table-bordered align-middle text-center">
                     <thead class="table-light">
@@ -116,35 +143,67 @@ body{
                             <th>الاسم</th>
                             <th>البريد الإلكتروني</th>
                             <th>الطبيب المشرف</th>
+                            <th>وقت الحجز</th>
                             <th>تاريخ التسجيل</th>
                             <th>إجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($patients as $patient)
-                            <tr>
-                                <td>{{ $patient->id }}</td>
-                                <td>{{ $patient->name }}</td>
-                                <td>{{ $patient->email }}</td>
-                                <td>
-                                    @if(optional($patient->latestAppointment)->doctor)
-                                        {{ $patient->latestAppointment->doctor->name }}
-                                    @else
-                                        -
-                                    @endif
-                                </td>
-                                <td>{{ optional($patient->created_at)->format('Y-m-d') }}</td>
-                                <td>
-                                    <form method="POST" action="{{ route('admin.patients.destroy', $patient) }}" onsubmit="return confirm('هل أنت متأكد من حذف المريض؟');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-danger">حذف</button>
-                                    </form>
-                                </td>
-                            </tr>
+                            @php
+                                $doctors = $patient->appointments->pluck('doctor')->filter()->unique('id');
+                            @endphp
+
+                            @if($doctors->isEmpty())
+                                <tr>
+                                    <td>{{ $patient->id }}</td>
+                                    <td>{{ $patient->name }}</td>
+                                    <td>{{ $patient->email }}</td>
+                                    <td>-</td>
+                                    <td>{{ optional($patient->created_at)->format('Y-m-d') }}</td>
+                                    <td>
+                                        <form method="POST"
+                                              action="{{ route('admin.patients.destroy', $patient) }}"
+                                              onsubmit="return confirm('هل أنت متأكد من حذف المريض؟');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-danger">حذف</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @else
+                                @foreach($doctors as $d)
+                                    @php
+                                        $times = $patient->appointments
+                                            ->where('doctor_id', $d->id)
+                                            ->pluck('time')
+                                            ->filter()
+                                            ->unique();
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $patient->id }}</td>
+                                        <td>{{ $patient->name }}</td>
+                                        <td>{{ $patient->email }}</td>
+                                        <td>{{ $d->name ?? '-' }}</td>
+                                        <td>{{ $times->isNotEmpty() ? $times->join(', ') : '-' }}</td>
+                                        <td>{{ optional($patient->created_at)->format('Y-m-d') }}</td>
+                                        <td>
+                                            @if($loop->first)
+                                                <form method="POST"
+                                                      action="{{ route('admin.patients.destroy', $patient) }}"
+                                                      onsubmit="return confirm('هل أنت متأكد من حذف المريض؟');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-sm btn-danger">حذف</button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
                         @empty
                             <tr>
-                                <td colspan="5" class="text-muted">لا يوجد مرضى</td>
+                                <td colspan="6" class="text-muted">لا يوجد مرضى</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -154,8 +213,10 @@ body{
             <div class="mt-3">
                 {{ $patients->links() }}
             </div>
+
         </div>
     </div>
+
 </div>
 
 </body>

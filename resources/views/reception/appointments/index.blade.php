@@ -75,40 +75,36 @@
 
 <!-- Sidebar -->
 <div class="sidebar">
-    <h4>مركز كيان لطب وجراحة الاسنان </h4>
+	<h4>مركز كيان لطب وجراحة الاسنان </h4>
 
-    <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-        <i class="fa-solid fa-chart-line ms-2"></i> Dashboard
-    </a>
+	<a href="{{ route('reception.dashboard') }}">
+		<i class="fa-solid fa-chart-line ms-2"></i> Dashboard
+	</a>
 
-    <a href="{{ route('admin.doctors.index') }}" class="{{ request()->routeIs('admin.doctors.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-user-doctor ms-2"></i> الأطباء
-    </a>
+	<a href="{{ route('reception.doctors.index') }}" class="active">
+		<i class="fa-solid fa-user-doctor ms-2"></i> الأطباء
+	</a>
 
-    <a href="{{ route('admin.patients.index') }}" class="{{ request()->routeIs('admin.patients.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-user ms-2"></i> المرضى
-    </a>
+	<a href="{{ route('reception.patients.index') }}">
+		<i class="fa-solid fa-user ms-2"></i> المرضى
+	</a>
 
-        <a href="{{ route('admin.receptionists.index') }}" class="{{ request()->routeIs('admin.receptionists.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-users ms-2"></i>
-        موظفو الاستقبال
-    </a>
+	<a href="{{ route('reception.appointments.index') }}">
+		<i class="fa-solid fa-calendar-check ms-2"></i> المواعيد
+	</a>
 
-    <a href="{{ route('admin.appointments.index') }}" class="{{ request()->routeIs('admin.appointments.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-calendar-check ms-2"></i> المواعيد
-    </a>
+	<a href="{{ route('reception.schedule.index') }}">
+		<i class="fa-solid fa-clock ms-2"></i> جدول الأطباء
+	</a>
 
-    <a href="{{ route('admin.schedule.index') }}" class="{{ request()->routeIs('admin.schedule.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-clock ms-2"></i> جدول الأطباء
-    </a>
-
-    <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="text-danger">
-            <i class="fa-solid fa-right-from-bracket ms-2"></i> تسجيل الخروج
-        </button>
-    </form>
+	<form action="{{ route('logout') }}" method="POST">
+		@csrf
+		<button type="submit" class="text-danger">
+			<i class="fa-solid fa-right-from-bracket ms-2"></i> تسجيل الخروج
+		</button>
+	</form>
 </div>
+
 
 <!-- ✅ Main Content -->
 <div class="main-content">
@@ -120,10 +116,10 @@
             <h5>الأطباء</h5>
             <div class="d-flex gap-2 flex-wrap">
                 @foreach($doctors as $doctor)
-                    <button class="btn btn-outline-primary btn-sm show-doctor"
-                            data-doctor-id="{{ $doctor->id }}">
+                    <a href="{{ route('reception.appointments.index') }}?doctor={{ $doctor->id }}"
+                       class="btn btn-outline-primary btn-sm">
                         {{ $doctor->name }}
-                    </button>
+                    </a>
                 @endforeach
             </div>
         </div>
@@ -148,23 +144,23 @@
                     <td>{{ $appointment->time }}</td>
                     <td>{{ $appointment->status }}</td>
                     <td>
-                        <a href="{{ route('admin.appointments.edit', $appointment) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                        <form action="{{ route('admin.appointments.approve', $appointment) }}" method="POST" class="d-inline">
+                        <a href="{{ route('reception.appointments.edit', $appointment) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <form action="{{ route('reception.appointments.approve', $appointment) }}" method="POST" class="d-inline">
                             @csrf
                             <button class="btn btn-success btn-sm">Approve</button>
                         </form>
 
-                        <form action="{{ route('admin.appointments.cancel', $appointment) }}" method="POST" class="d-inline">
+                        <form action="{{ route('reception.appointments.cancel', $appointment) }}" method="POST" class="d-inline">
                             @csrf
                             <button class="btn btn-warning btn-sm">Cancel</button>
                         </form>
 
-                        <form action="{{ route('admin.appointments.manual_remind', $appointment) }}" method="POST" class="d-inline">
+                        <form action="{{ route('reception.appointments.manual_remind', $appointment) }}" method="POST" class="d-inline">
                             @csrf
                             <button class="btn btn-info btn-sm">Manual Remind (1h)</button>
                         </form>
 
-                        <form action="{{ route('admin.appointments.destroy', $appointment) }}" method="POST" class="d-inline">
+                        <form action="{{ route('reception.appointments.destroy', $appointment) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-danger btn-sm"
