@@ -73,11 +73,11 @@ body{
 	<a href="{{ route('reception.patients.index') }}">
 		<i class="fa-solid fa-user ms-2"></i> المرضى
 	</a>
-
+<!-- 
 		<a href="{{ route('admin.receptionists.index') }}" class="{{ request()->routeIs('admin.receptionists.*') ? 'active' : '' }}">
 		<i class="fa-solid fa-users ms-2"></i>
 		موظفو الاستقبال
-	</a>
+	</a> -->
 
 	<a href="{{ route('reception.appointments.index') }}">
 		<i class="fa-solid fa-calendar-check ms-2"></i> المواعيد
@@ -108,7 +108,7 @@ body{
 	<div class="card mb-4">
 		<div class="card-body">
 			<h6 class="mb-3 fw-bold">➕ إضافة طبيب</h6>
-			<form method="POST" action="{{ route('admin.doctors.store') }}">
+			<form method="POST" action="{{ route('reception.doctors.store') }}">
 				@csrf
 				<div class="mb-3">
 					<label class="form-label">اسم الطبيب</label>

@@ -21,7 +21,11 @@ class AdminAppointmentController extends Controller
 
         $patients = User::where('role', 'patient')->get();
 
-        return view('admin.appointments.index', compact('appointments','doctors','patients'));
+        $viewPrefix = auth()->user()->role === 'admin' ? 'admin' : 'reception';
+
+        return view("{$viewPrefix}.appointments.index", compact('appointments','doctors','patients'));
+        // return view('reception.appointments.index', compact('appointments','doctors','patients'));
+        // return view('admin.appointments.index', compact('appointments','doctors','patients'));
     }
 
     // return available upcoming dates/times for a doctor (JSON)
@@ -108,7 +112,12 @@ class AdminAppointmentController extends Controller
     public function edit(Appointment $appointment)
     {
         $appointment->load(['user','doctor']);
-        return view('admin.appointments.edit', compact('appointment'));
+
+        $viewPrefix = auth()->user()->role === 'admin' ? 'admin' : 'reception';
+
+    return view("{$viewPrefix}.appointments.edit", compact('appointment'));
+        // return view('admin.appointments.edit', compact('appointment'));
+        // return view('reception.appointments.edit', compact('appointment'));
     }
 
     // Update appointment time/date by admin and mark as rescheduled
@@ -125,7 +134,11 @@ class AdminAppointmentController extends Controller
             'status' => 'rescheduled',
         ]);
 
-        return redirect()->route('admin.appointments.index')->with('success', 'Appointment rescheduled; patient will be notified.');
+        $prefix = auth()->user()->role === 'admin' ? 'admin' : 'reception';
+        return redirect()->route("{$prefix}.appointments.index")
+            ->with('success', 'Appointment rescheduled; patient will be notified.');
+        // return redirect()->route('admin.appointments.index')->with('success', 'Appointment rescheduled; patient will be notified.');
+        // return redirect()->route('reception.appointments.index')->with('success', 'Appointment rescheduled; patient will be notified.');
     }
 
     public function cancel(Appointment $appointment)

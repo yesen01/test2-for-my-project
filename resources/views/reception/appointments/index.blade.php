@@ -77,25 +77,35 @@
 <div class="sidebar">
 	<h4>مركز كيان لطب وجراحة الاسنان </h4>
 
-	<a href="{{ route('reception.dashboard') }}">
-		<i class="fa-solid fa-chart-line ms-2"></i> Dashboard
-	</a>
+    <a href="{{ route('reception.dashboard') }}"
+       class="{{ request()->routeIs('reception.dashboard') ? 'active' : '' }}">
+        <i class="fa-solid fa-chart-line ms-2"></i>
+        Dashboard
+    </a>
 
-	<a href="{{ route('reception.doctors.index') }}" class="active">
-		<i class="fa-solid fa-user-doctor ms-2"></i> الأطباء
-	</a>
+    <a href="{{ route('reception.doctors.index') }}"
+       class="{{ request()->routeIs('reception.doctors.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-user-doctor ms-2"></i>
+        الأطباء
+    </a>
 
-	<a href="{{ route('reception.patients.index') }}">
-		<i class="fa-solid fa-user ms-2"></i> المرضى
-	</a>
+    <a href="{{ route('reception.patients.index') }}"
+       class="{{ request()->routeIs('reception.patients.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-user ms-2"></i>
+        المرضى
+    </a>
 
-	<a href="{{ route('reception.appointments.index') }}">
-		<i class="fa-solid fa-calendar-check ms-2"></i> المواعيد
-	</a>
+    <a href="{{ route('reception.appointments.index') }}"
+       class="{{ request()->routeIs('reception.appointments.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-calendar-check ms-2"></i>
+        المواعيد
+    </a>
 
-	<a href="{{ route('reception.schedule.index') }}">
-		<i class="fa-solid fa-clock ms-2"></i> جدول الأطباء
-	</a>
+    <a href="{{ route('reception.schedule.index') }}"
+       class="{{ request()->routeIs('reception.schedule.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-clock ms-2"></i>
+        جدول الأطباء
+    </a>
 
 	<form action="{{ route('logout') }}" method="POST">
 		@csrf

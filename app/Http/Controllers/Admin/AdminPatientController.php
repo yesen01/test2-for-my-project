@@ -17,7 +17,10 @@ class AdminPatientController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('admin.patients.index', compact('patients'));
+        $viewPrefix = auth()->user()->role === 'admin' ? 'admin' : 'reception';
+        return view("{$viewPrefix}.patients.index", compact('patients'));
+        // return view('admin.patients.index', compact('patients'));
+        // return view('reception.patients.index', compact('patients'));
     }
 
     // Delete a patient
@@ -29,6 +32,10 @@ class AdminPatientController extends Controller
 
         $patient->delete();
 
-        return redirect()->route('admin.patients.index')->with('success', 'تم حذف المريض بنجاح');
+        $prefix = auth()->user()->role === 'admin' ? 'admin' : 'reception';
+        return redirect()->route("$prefix.patients.index")->with('success', 'تم حذف المريض بنجاح');
+
+        // return redirect()->route('admin.patients.index')->with('success', 'تم حذف المريض بنجاح');
+        // return redirect()->route('reception.patients.index')->with('success', 'تم حذف المريض بنجاح');
     }
 }

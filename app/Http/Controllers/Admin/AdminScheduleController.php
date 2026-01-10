@@ -21,7 +21,10 @@ class AdminScheduleController extends Controller
             $dates[] = $d;
         }
 
-        return view('admin.schedule.index', compact('doctors','dates'));
+        $viewPrefix = auth()->user()->role === 'admin' ? 'admin' : 'reception';
+        
+        return view("{$viewPrefix}.schedule.index", compact('doctors','dates'));
+        // return view('admin.schedule.index', compact('doctors','dates'));
     }
 
     // Toggle a one-off slot for a doctor on a specific date/time
