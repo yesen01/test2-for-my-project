@@ -6,319 +6,321 @@ $nowDate = Carbon::now()->toDateString();
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>لوحة المريض</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>حجز موعد - مركز كيان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<style>
-:root{--accent:#2563eb;--muted:#6b7280;--bg:#f6f7fb}
-*{box-sizing:border-box}
-body{font-family:tahoma,system-ui,Segoe UI,Arial;background:var(--bg);padding:24px;margin:0;color:#111}
-.container{max-width:920px;margin:24px auto;display:flex;gap:20px;align-items:flex-start}
-.card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 6px 20px rgba(3,7,18,0.06);flex:1}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-h2{margin:0;font-size:20px}
-.form-row{margin-top:12px}
-label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-input,select,textarea{width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:8px;background:#fff;font-size:14px}
-input[disabled],input[readonly],textarea[readonly]{background:#f3f4f6;color:#374151}
-select{appearance:none;background-image:none}
-button.btn{background:var(--accent);color:#fff;padding:10px 16px;border:none;border-radius:10px;cursor:pointer}
-.msg{padding:10px;border-radius:8px;margin-bottom:12px}
-.msg-success{background:#ecfdf5;color:#065f46}
-.msg-error{background:#fff1f2;color:#9f1239;border:1px solid rgba(159,18,57,0.08)}
-.error-text{color:#b91c1c;font-size:13px;margin-top:6px}
+    <style>
+        :root {
+            --accent: #0f766e; /* اللون الزيتي لمركز كيان */
+            --accent-hover: #0d635d;
+            --muted: #64748b;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
 
-/* side menu */
-#menuBtn{position:fixed;top:18px;right:18px;background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;z-index:40}
-#sideMenu{
-position:fixed;
-top:0;
-right:0;
-width:260px;
-height:100%;
-background:#fff;
-padding:20px;
-box-shadow:-8px 0 24px rgba(3,7,18,0.08);
-transform:translateX(100%); /* مخفية */
-transition:transform .25s ease;
-z-index:50;
-}
+        * { box-sizing: border-box; }
 
-#sideMenu.open{
-transform:translateX(0); /* ظاهرة */
-}
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg);
+            padding: 0;
+            margin: 0;
+            color: #1e293b;
+        }
 
-#overlay{position:fixed;inset:0;background:rgba(3,7,18,0.4);opacity:0;pointer-events:none;transition:opacity .2s}
-#overlay.show{opacity:1;pointer-events:auto;}
+        /* القائمة الجانبية المحدثة */
+        #sideMenu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 280px;
+            height: 100%;
+            background: var(--card);
+            padding: 30px 20px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+            transform: translateX(100%);
+            transition: transform .3s ease;
+            z-index: 1000;
+        }
 
-/* responsive */
-@media(max-width:720px){
-.container{
-padding:12px;
-flex-direction:column
-}
+        #sideMenu.open { transform: translateX(0); }
 
-#sideMenu{
-width:100%;
-}
-}
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 118, 110, 0.2);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+            z-index: 999;
+        }
 
-#sideMenu.open{right:0}
+        #overlay.show { opacity: 1; pointer-events: auto; }
 
-</style>
+        /* الأزرار والحقول */
+        #menuBtn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .container { max-width: 700px; margin: 60px auto; padding: 0 20px; }
+
+        .card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            border: 1px solid rgba(15, 118, 110, 0.05);
+        }
+
+        h2 { color: var(--accent); font-weight: 700; margin-bottom: 25px; text-align: center; }
+
+        .form-row { margin-bottom: 18px; }
+
+        label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #475569; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: 0.3s;
+            outline: none;
+        }
+
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1); }
+
+        input[readonly] { background: #f8fafc; color: #64748b; cursor: not-allowed; }
+
+        button.btn {
+            background: var(--accent);
+            color: #fff;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(15, 118, 110, 0.2);
+        }
+
+        button.btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+        .msg-success { background: #dcfce7; color: #166534; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 600; text-align: center; }
+
+        nav ul li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #475569;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        nav ul li a:hover, nav ul li a.active {
+            background: rgba(15, 118, 110, 0.1);
+            color: var(--accent);
+        }
+
+        .logout-btn {
+            color: var(--danger);
+            border: 1px solid #fee2e2;
+            background: #fff;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        @media(max-width: 600px) { .container { margin-top: 80px; } }
+    </style>
 </head>
 
 <body>
 
-<button id="menuBtn" aria-controls="sideMenu" aria-expanded="false">☰</button>
+<button id="menuBtn"><i class="fa-solid fa-bars"></i></button>
 <div id="overlay" onclick="toggleMenu(false)"></div>
 
-<div id="sideMenu" aria-hidden="true" role="navigation" aria-label="قائمة المريض" tabindex="-1" onkeydown="if(event.key==='Escape')toggleMenu(false)">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-        <h3 style="margin:0">القائمة</h3>
-        <button onclick="toggleMenu(false)" aria-label="إغلاق القائمة" style="background:transparent;border:none;font-size:18px;cursor:pointer">✕</button>
-    </div>
-
-    <div style="margin:12px 0;color:var(--muted);font-size:14px">
-        مرحباً، <strong>{{ Auth::user()->name }}</strong>
+<div id="sideMenu">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <div style="width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: white; font-size: 1.5rem;">
+            <i class="fa-solid fa-user-injured"></i>
+        </div>
+        <h3 style="margin: 0; font-size: 1.1rem; color: var(--accent);">{{ Auth::user()->name }}</h3>
     </div>
 
     <nav>
-        <ul style="list-style:none;padding:0;margin:12px 0 0 0;display:flex;flex-direction:column;gap:8px">
+        <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:10px">
             <li>
-                <a href="{{ route('patient.dashboard') }}"
-                     @if(request()->routeIs('patient.dashboard')) aria-current="page" style="display:block;padding:8px 10px;border-radius:8px;background:rgba(37,99,235,0.08);color:var(--accent);font-weight:600;text-decoration:none" @else style="display:block;padding:8px 10px;border-radius:8px;color:inherit;text-decoration:none" @endif>
-                    حجز موعد
+                <a href="{{ route('patient.dashboard') }}" class="{{ request()->routeIs('patient.dashboard') ? 'active' : '' }}">
+                    <i class="fa-solid fa-calendar-plus"></i> حجز موعد
                 </a>
             </li>
             <li>
-                <a href="{{ route('patient.appointments') }}"
-                     @if(request()->routeIs('patient.appointments')) aria-current="page" style="display:block;padding:8px 10px;border-radius:8px;background:rgba(37,99,235,0.08);color:var(--accent);font-weight:600;text-decoration:none" @else style="display:block;padding:8px 10px;border-radius:8px;color:inherit;text-decoration:none" @endif>
-                    مواعيدي
+                <a href="{{ route('patient.appointments') }}" class="{{ request()->routeIs('patient.appointments') ? 'active' : '' }}">
+                    <i class="fa-solid fa-notes-medical"></i> مواعيدي
                 </a>
-            </li>
-            <li>
-
             </li>
         </ul>
     </nav>
 
-    <div style="margin-top:14px;border-top:1px solid #f1f5f9;padding-top:12px">
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" style="width:100%;padding:10px;border-radius:8px;border:1px solid #eee;background:#fff;cursor:pointer">تسجيل الخروج</button>
-        </form>
-    </div>
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" class="logout-btn">
+            <i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج
+        </button>
+    </form>
 </div>
 
 <div class="container">
-    <div class="card" role="region" aria-labelledby="bookHeading">
-        <div class="header">
-            <h2 id="bookHeading">حجز موعد</h2>
-            <small style="color:var(--muted)">{{ Auth::user()->name }}</small>
-        </div>
+    <div class="card">
+        <h2><i class="fa-solid fa-file-medical" style="margin-left: 10px;"></i>حجز موعد جديد</h2>
 
         @if(session('success'))
-            <div class="msg msg-success" role="status">{{ session('success') }}</div>
-        @endif
-
-        @if($errors->any())
-            <div class="msg msg-error">
-                تحقق من الحقول المدخلة
-            </div>
+            <div class="msg-success"><i class="fa-solid fa-check-circle"></i> {{ session('success') }}</div>
         @endif
 
         <form method="POST" action="{{ route('patient.dashboard.store') }}" novalidate>
             @csrf
 
             <div class="form-row">
-                <label for="name">الاسم</label>
-                <input id="name" value="{{ Auth::user()->name }}" readonly aria-readonly="true">
+                <label><i class="fa-solid fa-user"></i> الاسم الكامل</label>
+                <input value="{{ Auth::user()->name }}" readonly>
             </div>
 
             <div class="form-row">
-                <label for="email">البريد</label>
-                <input id="email" value="{{ Auth::user()->email }}" readonly aria-readonly="true">
+                <label><i class="fa-solid fa-envelope"></i> البريد الإلكتروني</label>
+                <input value="{{ Auth::user()->email }}" readonly>
             </div>
 
             <div class="form-row">
-                <label for="day">اليوم (أيام توافر الطبيب)</label>
-                <select id="day" name="day" required>
-                    <option value="">اختر الطبيب أولاً</option>
-                </select>
-                @error('day')<div class="error-text">{{ $message }}</div>@enderror
-            </div>
-
-            <div class="form-row">
-                <label for="doctor_id">الطبيب</label>
+                <label for="doctor_id"><i class="fa-solid fa-stethoscope"></i> اختر الطبيب</label>
                 <select id="doctor_id" name="doctor_id" required>
-                    <option value="">اختر الطبيب</option>
+                    <option value="">-- اضغط للاختيار --</option>
                     @foreach($doctors as $doc)
                         <option value="{{ $doc->id }}" {{ old('doctor_id') == $doc->id ? 'selected' : '' }}>
-                            {{ $doc->name }}{{ isset($doc->specialty) ? ' — '.$doc->specialty : '' }}
+                            د. {{ $doc->name }} @isset($doc->specialty) ({{ $doc->specialty }}) @endisset
                         </option>
                     @endforeach
                 </select>
-                @error('doctor_id')<div class="error-text">{{ $message }}</div>@enderror
+                @error('doctor_id')<div style="color:var(--danger); font-size:12px; margin-top:5px;">{{ $message }}</div>@enderror
             </div>
 
             <div class="form-row">
-                <label for="time">الوقت</label>
+                <label for="day"><i class="fa-solid fa-calendar-day"></i> اليوم المتاح</label>
+                <select id="day" name="day" required>
+                    <option value="">اختر الطبيب أولاً</option>
+                </select>
+                @error('day')<div style="color:var(--danger); font-size:12px; margin-top:5px;">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="form-row">
+                <label for="time"><i class="fa-solid fa-clock"></i> الساعة</label>
                 <select id="time" name="time" required>
                     <option value="">اختر اليوم أولاً</option>
                 </select>
-                @error('time')<div class="error-text">{{ $message }}</div>@enderror
+                @error('time')<div style="color:var(--danger); font-size:12px; margin-top:5px;">{{ $message }}</div>@enderror
             </div>
 
             <div class="form-row">
-                <label for="notes">ملاحظات</label>
-                <textarea id="notes" name="notes" rows="4" placeholder="أدخل أي ملاحظات..." >{{ old('notes') }}</textarea>
-                @error('notes')<div class="error-text">{{ $message }}</div>@enderror
+                <label for="notes"><i class="fa-solid fa-comment-medical"></i> ملاحظات أو شكوى</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="أدخل أي ملاحظات إضافية هنا...">{{ old('notes') }}</textarea>
             </div>
 
-            <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
-                <button class="btn" type="submit">حجز الموعد</button>
-                <small style="color:var(--muted)">الحد الأدنى للتاريخ: {{ $nowDate }}</small>
+            <div style="margin-top:25px;">
+                <button class="btn" type="submit">تأكيد الحجز الآن</button>
+                <p style="text-align: center; font-size: 12px; color: var(--muted); margin-top: 15px;">
+                    <i class="fa-solid fa-info-circle"></i> تاريخ اليوم: {{ $nowDate }}
+                </p>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-function toggleMenu(force){
-    const menu=document.getElementById('sideMenu'), overlay=document.getElementById('overlay'), btn=document.getElementById('menuBtn');
-    const isOpen = menu.classList.contains('open');
-    const open = typeof force === 'boolean' ? force : !isOpen;
-    menu.classList.toggle('open', open);
-    overlay.classList.toggle('show', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    menu.setAttribute('aria-hidden', open ? 'false' : 'true');
-}
-document.getElementById('menuBtn').addEventListener('click',()=>toggleMenu());
-</script>
-
-@php
-    $availability = [];
-    foreach($doctors as $d) {
-        foreach($d->doctorSlots->whereNotNull('day_of_week') as $s) {
-            $availability[$d->id][$s->day_of_week][] = [
-                'start' => $s->start_time,
-                'end' => $s->end_time,
-            ];
-        }
+    function toggleMenu(force) {
+        const menu = document.getElementById('sideMenu'), overlay = document.getElementById('overlay');
+        const open = typeof force === 'boolean' ? force : !menu.classList.contains('open');
+        menu.classList.toggle('open', open);
+        overlay.classList.toggle('show', open);
     }
-    $oldDoctor = old('doctor_id', '');
-    $oldDay = old('day', '');
-    $oldTime = old('time', '');
-@endphp
+    document.getElementById('menuBtn').addEventListener('click', () => toggleMenu());
 
-<script>
+    // JS للتعامل مع المواعيد (بقي كما هو مع تحسين المظهر)
     (function(){
-        const daysOrder = [6,0,1,2,3,4,5];
+        // استبدل السطر القديم بهذا السطر
+        const availability = @json($availability ?? []);
         const dayLabels = {0:'الأحد',1:'الإثنين',2:'الثلاثاء',3:'الأربعاء',4:'الخميس',5:'الجمعة',6:'السبت'};
-        const availability = @json($availability);
-        const stepMinutes = 60; // 60 minutes -> hourly slots
+        const daysOrder = [6,0,1,2,3,4,5];
 
         const doctorSel = document.getElementById('doctor_id');
         const daySel = document.getElementById('day');
         const timeSel = document.getElementById('time');
 
-        function clearSelect(sel, placeholder){
-            sel.innerHTML = '';
-            const opt = document.createElement('option');
-            opt.value = '';
-            opt.textContent = placeholder;
-            sel.appendChild(opt);
+        function clearSelect(sel, text) {
+            sel.innerHTML = `<option value="">${text}</option>`;
         }
 
-        function formatRanges(ranges){
-            return ranges.map(r => r.start + (r.end ? (' - ' + r.end) : '')).join(', ');
-        }
-
-        function timesBetween(start, end, step){
-            // produce hourly times (or step-based) between rounded start (up) and end (down)
-            if (!start) return [];
-            const toMinutes = s => {
-                const [hh, mm] = s.split(':').map(Number);
-                return hh * 60 + mm;
-            };
-            const toHHMM = m => {
-                const hh = String(Math.floor(m/60)).padStart(2,'0');
-                const mm = String(m%60).padStart(2,'0');
-                return hh + ':' + mm;
-            };
-
-            const startM = toMinutes(start);
-            if (!end) {
-                const roundedStart = Math.ceil(startM / 60) * 60;
-                return [toHHMM(roundedStart)];
-            }
-
-            const endM = toMinutes(end);
-            const startHour = Math.ceil(startM / 60) * 60; // round up to next full hour
-            const endHour = Math.floor(endM / 60) * 60;   // round down to full hour
-            const res = [];
-            if (startHour > endHour) return res;
-            for (let t = startHour; t <= endHour; t += step) {
-                res.push(toHHMM(t));
-            }
-            return res;
-        }
-
-        function populateDays(docId){
+        doctorSel.addEventListener('change', function() {
+            if (!this.value) { clearSelect(daySel, 'اختر الطبيب'); return; }
             clearSelect(daySel, 'اختر اليوم');
-            clearSelect(timeSel, 'اختر اليوم أولاً');
-            const avail = availability[docId] || {};
+            const avail = availability[this.value] || {};
             daysOrder.forEach(dow => {
-                if (!avail[dow]) return;
-                const opt = document.createElement('option');
-                opt.value = dow;
-                opt.textContent = dayLabels[dow] + ' — ' + formatRanges(avail[dow]);
-                daySel.appendChild(opt);
-            });
-        }
-
-        function populateTimes(docId, dow){
-            clearSelect(timeSel, 'اختر وقتاً');
-            const ranges = (availability[docId] || {})[dow] || [];
-            const added = new Set();
-            ranges.forEach(r => {
-                const list = timesBetween(r.start, r.end, stepMinutes);
-                list.forEach(t => {
-                    if (added.has(t)) return;
-                    added.add(t);
+                if (avail[dow]) {
                     const opt = document.createElement('option');
-                    opt.value = t;
-                    opt.textContent = t;
-                    timeSel.appendChild(opt);
-                });
+                    opt.value = dow;
+                    opt.textContent = dayLabels[dow];
+                    daySel.appendChild(opt);
+                }
             });
-        }
-
-        doctorSel.addEventListener('change', function(){
-            if (!this.value) { clearSelect(daySel, 'اختر الطبيب أولاً'); clearSelect(timeSel,'اختر اليوم أولاً'); return; }
-            populateDays(this.value);
         });
 
-        daySel.addEventListener('change', function(){
+        daySel.addEventListener('change', function() {
             const docId = doctorSel.value;
             if (!docId || !this.value) { clearSelect(timeSel, 'اختر اليوم أولاً'); return; }
-            populateTimes(docId, this.value);
+            clearSelect(timeSel, 'اختر الساعة');
+            const ranges = availability[docId][this.value] || [];
+            ranges.forEach(r => {
+                // توليد الساعات (تبسيط للكود السابق)
+                let start = parseInt(r.start.split(':')[0]);
+                let end = parseInt(r.end.split(':')[0]);
+                for(let i=start; i<=end; i++) {
+                    const t = i.toString().padStart(2, '0') + ':00';
+                    const opt = document.createElement('option');
+                    opt.value = t; opt.textContent = t;
+                    timeSel.appendChild(opt);
+                }
+            });
         });
-
-        const oldDoctor = '{{ $oldDoctor }}';
-        const oldDay = '{{ $oldDay }}';
-        const oldTime = '{{ $oldTime }}';
-        if (oldDoctor) {
-            doctorSel.value = oldDoctor;
-            populateDays(oldDoctor);
-            if (oldDay) {
-                daySel.value = oldDay;
-                populateTimes(oldDoctor, oldDay);
-                if (oldTime) timeSel.value = oldTime;
-            }
-        }
     })();
 </script>
 

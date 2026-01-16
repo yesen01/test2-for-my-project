@@ -1,11 +1,11 @@
 <?php
 
-namespace App\\Http\\Controllers\\Receptionists;
+namespace App\Http\Controllers\Receptionists;
 
-use App\\Http\\Controllers\\Controller;
-use Illuminate\\Http\\Request;
-use App\\Models\\Doctor;
-use App\\Models\\DoctorSlot;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Doctor;
+use App\Models\DoctorSlot;
 
 class ReceptionistsScheduleController extends Controller
 {

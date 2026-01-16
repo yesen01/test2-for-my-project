@@ -156,6 +156,13 @@ class AdminAppointmentController extends Controller
     // Manual reminder: schedule/send reminder 1 hour before appointment
     public function manualRemind(Appointment $appointment)
     {
+
+
+    $appointment->update([
+            'status' => 'reminded'
+        ]);
+
+        return redirect()->back()->with('success', 'تم إرسال التنبيه! سيظهر الآن في جرس الإشعارات لدى المريض.');
         $user = $appointment->user;
         if (!$user || !$user->email) {
             return redirect()->back()->with('error', 'No patient email available to send reminder.');
@@ -176,4 +183,8 @@ class AdminAppointmentController extends Controller
 
         return redirect()->back()->with('success', $msg);
     }
+
+
+
+
 }

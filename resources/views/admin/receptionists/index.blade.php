@@ -98,40 +98,49 @@ body{ background:#f4f6f9; overflow-x:hidden; font-family:Tahoma, sans-serif; mar
                 </form>
             </div>
 
-            <div class="col-md-7">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped align-middle text-center mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>#</th>
-                                <th>الاسم</th>
-                                <th>البريد</th>
-                                <th>العمليات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($receptionists as $r)
-                                <tr>
-                                    <td>{{ $r->id }}</td>
-                                    <td>{{ $r->name }}</td>
-                                    <td>{{ $r->email }}</td>
-                                    <td>
-                                        <form action="{{ route('admin.receptionists.delete', $r) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟');" style="display:inline-block">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-sm btn-danger">حذف</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4">لا يوجد موظفون بعد</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle text-center mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>الاسم</th>
+                <th>البريد</th>
+                <th>الباسورد</th> {{-- هذا العمود سيحتوي على زر التعديل --}}
+                <th>العمليات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($receptionists as $r)
+                <tr>
+                    <td>{{ $r->id }}</td>
+                    <td>{{ $r->name }}</td>
+                    <td>{{ $r->email }}</td>
+                    <td>
+                        {{-- تم تغيير $user->id إلى $r->id ليتناسب مع المتغير في حلقة forelse --}}
+                        <a href="{{ route('admin.receptionist.editPassword', $r->id) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fa-solid fa-key ms-1"></i>
+                            تعيين كلمة مرور
+                        </a>
+                    </td>
+                    <td>
+                        <form action="{{ route('admin.receptionists.delete', $r) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟');" style="display:inline-block">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fa-solid fa-trash ms-1"></i>
+                                حذف
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5">لا يوجد موظفون بعد</td> {{-- تم تعديل الـ colspan ليكون 5 --}}
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
         </div>
     </div>
 

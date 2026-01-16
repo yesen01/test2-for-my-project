@@ -161,7 +161,7 @@
 
                         <form action="{{ route('admin.appointments.manual_remind', $appointment) }}" method="POST" class="d-inline">
                             @csrf
-                            <button class="btn btn-info btn-sm">Manual Remind (1h)</button>
+                            <button class="btn btn-info btn-sm">Manual Remind </button>
                         </form>
 
                         <form action="{{ route('admin.appointments.destroy', $appointment) }}" method="POST" class="d-inline">

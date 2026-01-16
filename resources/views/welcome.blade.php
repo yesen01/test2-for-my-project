@@ -11,14 +11,23 @@
     </div>
 
     <nav>
-        <a href="#services">خدماتنا</a>
-        <a href="#team">الفريق الطبي</a>
-        <a href="#contact">اتصل بنا</a>
+    <a href="#services">خدماتنا</a>
+    <a href="#team">الفريق الطبي</a>
+    <a href="#contact">اتصل بنا</a>
 
-        @guest
-            <a href="{{ route('Registration') }}">تسجيل دخول</a>
-        @endguest
-    </nav>
+    {{-- إذا كان الزائر ضيفاً (غير مسجل دخول) --}}
+    @guest
+        <a href="{{ route('login') }}" style="background: rgba(255,255,255,0.2); border: 1px solid #fff;">تسجيل دخول</a>
+        <a href="{{ route('Registration') }}" style="background: var(--accent); color: white;">إنشاء حساب</a>
+    @endguest
+
+    {{-- إذا كان المستخدم مسجلاً دخوله بالفعل --}}
+    @auth
+        <a href="{{ route('patient.dashboard') }}" style="background: var(--accent); color: white;">
+            <i class="fa-solid fa-user"></i> لوحة التحكم
+        </a>
+    @endauth
+</nav>
 </header>
 
 <section class="hero">
@@ -52,11 +61,11 @@
             <p>اختصاص جراحة وزراعة الأسنان</p>
         </div>
         <div class="card">
-            <h3>د. ليلى محمد</h3>
+            <h3>د. عاصم البرعصي</h3>
             <p>اختصاص تجميل وتقويم الأسنان</p>
         </div>
         <div class="card">
-            <h3>د. سامي علي</h3>
+            <h3>د. محمد اسامة</h3>
             <p>أخصائي طب أسنان عام</p>
         </div>
     </div>
@@ -65,7 +74,7 @@
 <section id="contact" class="contact">
     <h2>اتصل بنا</h2>
     <p>للتواصل معنا:</p>
-    <strong>+218 91 234 5678</strong>
+    <strong dir="ltr" style="display: inline-block;">+218 92 242 1289</strong>
 </section>
 
 <footer>
@@ -77,9 +86,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
 
 :root{
-    --primary: #023e8a;
-    --accent: #00b4d8;
-    --bg: #f7f9ff;
+    /* تم تعديل الألوان هنا للدرجات الزيتية المتناسقة مع الـ Dashboard */
+    --primary: #0f766e;
+    --accent: #14b8a6;
+    --bg: #f4f6f9;
     --card: #ffffff;
     --text: #12202b;
     --muted: #5b6b7a;
@@ -93,9 +103,9 @@ html,body{height:100%}
 body {
     font-family: 'Cairo', Arial, sans-serif;
     margin: 0;
-    padding-top: 100px; /* header offset */
+    padding-top: 100px;
     direction: rtl;
-    background: linear-gradient(180deg, var(--bg) 0%, #eef6ff 100%);
+    background: linear-gradient(180deg, var(--bg) 0%, #f0fdfa 100%);
     color: var(--text);
     line-height: 1.6;
     -webkit-font-smoothing:antialiased;
@@ -107,14 +117,15 @@ body {
     position: fixed;
     top: 0;
     width: 100%;
-    background: rgba(2,62,138,0.85);
+    /* تم تغيير الخلفية للون الزيتي بلمسة شفافية */
+    background: rgba(15, 118, 110, 0.9);
     padding: 14px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
     backdrop-filter: blur(6px);
-    box-shadow: 0 8px 24px rgba(2,62,138,0.12);
+    box-shadow: 0 8px 24px rgba(15, 118, 110, 0.15);
 }
 
 .logo h1 {
@@ -148,20 +159,20 @@ nav a {
 }
 
 nav a:hover {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.12);
     transform: translateY(-3px);
 }
 
 nav a:focus {
-    box-shadow: 0 0 0 4px rgba(2,62,138,0.12);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.2);
 }
 
 /* Hero */
 .hero {
     text-align: center;
     padding: 110px 20px;
-    background-image: linear-gradient(180deg, rgba(2,62,138,0.45), rgba(0,0,0,0.12)), url('https://images.unsplash.com/photo-1588776814546-859414a0f3f0?q=80&w=1600&auto=format&fit=crop&s=0c9b0c0b6c0f8e0d');
-    background-size: cover;
+    /* دمج تدرج زيتي مع خلفية الصورة */
+background-image: linear-gradient(180deg, rgba(15, 118, 110, 0.5), rgba(0,0,0,0.2)), url('{{ asset("images/t2.jpeg") }}');    background-size: cover;
     background-position: center;
     color: white;
     box-shadow: inset 0 -80px 120px rgba(0,0,0,0.15);
@@ -211,11 +222,11 @@ section {
     padding: 22px;
     width: 260px;
     border-radius: var(--radius);
-    box-shadow: 0 10px 30px rgba(18,38,63,0.06);
+    box-shadow: 0 10px 30px rgba(15, 118, 110, 0.08);
     text-align: center;
     transition: transform .22s ease, box-shadow .22s ease;
     color: var(--text);
-    border: 1px solid rgba(3,46,89,0.04);
+    border: 1px solid rgba(15, 118, 110, 0.05);
 }
 
 .card h3 {
@@ -233,7 +244,7 @@ section {
 
 .card:hover {
     transform: translateY(-8px) scale(1.01);
-    box-shadow: 0 22px 48px rgba(18,38,63,0.12);
+    box-shadow: 0 22px 48px rgba(15, 118, 110, 0.15);
 }
 
 /* Contact & Footer */
@@ -242,13 +253,14 @@ section {
     text-align: center;
     padding: 40px 20px;
     border-radius: 14px;
-    border: 1px solid rgba(2,62,138,0.06);
+    border: 1px solid rgba(15, 118, 110, 0.08);
 }
 
 .contact h2 { margin-top: 0; color: var(--primary); }
 
 footer {
-    background: linear-gradient(90deg, var(--primary), #005f9e);
+    /* تدرج طولي زيتي للهوية البصرية */
+    background: linear-gradient(90deg, var(--primary), #0d635d);
     color: white;
     text-align: center;
     padding: 18px;

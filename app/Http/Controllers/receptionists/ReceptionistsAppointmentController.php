@@ -1,41 +1,42 @@
 <?php
 
 namespace App\Http\Controllers\Receptionists;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\DoctorSlot;
 use App\Models\User;
-use App\Jobs\SendAppointmentReminder;
 use Carbon\Carbon;
 
 class ReceptionistsAppointmentController extends Controller
 {
-    // list all appointments and doctors for receptionist
+    /**
+     * عرض قائمة المواعيد والأطباء لموظف الاستقبال
+     */
     public function index()
     {
-        $appointments = Appointment::with(['user','doctor'])->orderBy('date','desc')->get();
+        $appointments = Appointment::with(['user', 'doctor'])->orderBy('date', 'desc')->get();
         $doctors = Doctor::all();
-
         $patients = User::where('role', 'patient')->get();
 
-        return view('receptionists.appointments.index', compact('appointments','doctors','patients'));
+        return view('receptionists.appointments.index', compact('appointments', 'doctors', 'patients'));
     }
 
-    // return available upcoming dates/times for a doctor (JSON)
+    /**
+     * جلب المواعيد المتاحة للطبيب (JSON)
+     */
     public function available(Doctor $doctor)
     {
-        $today = \Carbon\Carbon::today();
+        $today = Carbon::today();
         $days = [];
 
-        // for the next 14 days, collect available slots
         for ($i = 0; $i < 14; $i++) {
             $date = $today->copy()->addDays($i);
             $weekday = $date->dayOfWeek;
 
             foreach ($doctor->doctorSlots as $slot) {
-                // weekly slot
                 if (!is_null($slot->day_of_week) && (int)$slot->day_of_week === $weekday) {
                     $booked = $slot->isBookedOnDate($date);
                     $days[] = [
@@ -46,7 +47,6 @@ class ReceptionistsAppointmentController extends Controller
                     ];
                 }
 
-                // one-off slot matching the date
                 if (is_null($slot->day_of_week) && $slot->start_at) {
                     if ($slot->start_at->isSameDay($date)) {
                         $booked = $slot->isBookedOnDate($date);
@@ -64,7 +64,9 @@ class ReceptionistsAppointmentController extends Controller
         return response()->json($days);
     }
 
-    // Receptionist books on behalf of a patient
+    /**
+     * حجز موعد جديد نيابة عن مريض
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -73,44 +75,50 @@ class ReceptionistsAppointmentController extends Controller
             'date' => 'required|date',
         ]);
 
-        $patient = User::findOrFail($request->input('patient_id'));
         $slot = DoctorSlot::findOrFail($request->input('doctor_slot_id'));
+        $dateFormatted = Carbon::parse($request->input('date'))->toDateString();
 
-        // prevent double-book for any patient on this slot/date
         $exists = Appointment::where('doctor_slot_id', $slot->id)
-            ->where('date', \Carbon\Carbon::parse($request->input('date'))->toDateString())
+            ->where('date', $dateFormatted)
             ->exists();
 
         if ($exists) {
-            return redirect()->back()->withErrors(['slot' => 'The selected slot is already booked for this date.']);
+            return redirect()->back()->withErrors(['slot' => 'هذا الموعد محجوز مسبقاً لهذا التاريخ.']);
         }
 
         Appointment::create([
-            'user_id' => $patient->id,
+            'user_id' => $request->input('patient_id'),
             'doctor_id' => $slot->doctor_id,
             'doctor_slot_id' => $slot->id,
-            'date' => \Carbon\Carbon::parse($request->input('date'))->toDateString(),
+            'date' => $dateFormatted,
             'time' => $slot->start_time ?? ($slot->start_at ? $slot->start_at->format('H:i') : $request->input('time')),
-            'status' => 'pending',
+            'status' => 'confirmed', // الموظف يحجز ويؤكد مباشرة
         ]);
 
-        return redirect()->back()->with('success', 'Appointment created for patient.');
+        return redirect()->back()->with('success', 'تم إنشاء الموعد وتأكيده بنجاح.');
     }
 
+    /**
+     * قبول/تأكيد الموعد
+     */
     public function approve(Appointment $appointment)
     {
         $appointment->update(['status' => 'confirmed']);
-        return redirect()->back()->with('success', 'Appointment approved.');
+        return redirect()->back()->with('success', 'تم تأكيد الموعد بنجاح.');
     }
 
-    // Show edit form for an appointment (receptionist)
+    /**
+     * صفحة تعديل الموعد
+     */
     public function edit(Appointment $appointment)
     {
-        $appointment->load(['user','doctor']);
+        $appointment->load(['user', 'doctor']);
         return view('receptionists.appointments.edit', compact('appointment'));
     }
 
-    // Update appointment time/date by receptionist and mark as rescheduled
+    /**
+     * تحديث الموعد وتفعيل جرس الإشعارات عند المريض
+     */
     public function update(Request $request, Appointment $appointment)
     {
         $request->validate([
@@ -119,47 +127,43 @@ class ReceptionistsAppointmentController extends Controller
         ]);
 
         $appointment->update([
-            'date' => \Carbon\Carbon::parse($request->input('date'))->toDateString(),
+            'date' => Carbon::parse($request->input('date'))->toDateString(),
             'time' => $request->input('time'),
-            'status' => 'rescheduled',
+            'status' => 'rescheduled', // تظهر كنقطة حمراء في جرس المريض
         ]);
 
-        return redirect()->route('receptionists.appointments.index')->with('success', 'Appointment rescheduled; patient will be notified.');
+        return redirect()->route('receptionists.appointments.index')
+            ->with('success', 'تم تعديل الموعد؛ سيظهر تنبيه للمريض في لوحة التحكم.');
     }
 
+    /**
+     * إلغاء الموعد
+     */
     public function cancel(Appointment $appointment)
     {
         $appointment->update(['status' => 'cancelled']);
-        return redirect()->back()->with('success', 'Appointment cancelled.');
+        return redirect()->back()->with('success', 'تم إلغاء الموعد.');
     }
 
+    /**
+     * حذف نهائي
+     */
     public function destroy(Appointment $appointment)
     {
         $appointment->delete();
-        return redirect()->back()->with('success', 'Appointment deleted.');
+        return redirect()->back()->with('success', 'تم حذف الموعد من السجلات.');
     }
 
-    // Manual reminder: schedule/send reminder 1 hour before appointment
+    /**
+     * إرسال تنبيه يدوي يظهر في "الجرس" عند المريض
+     */
     public function manualRemind(Appointment $appointment)
     {
-        $user = $appointment->user;
-        if (!$user || !$user->email) {
-            return redirect()->back()->with('error', 'No patient email available to send reminder.');
-        }
+        // تغيير الحالة لـ 'reminded' ليتم التقاطها بواسطة الكود الذي وضعناه في الـ Blade
+        $appointment->update([
+            'status' => 'reminded'
+        ]);
 
-        $dt = Carbon::parse($appointment->date . ' ' . $appointment->time);
-        $sendAt = $dt->copy()->subHour();
-        $now = Carbon::now();
-
-        $job = new SendAppointmentReminder($appointment);
-        if ($sendAt->lte($now)) {
-            dispatch($job);
-            $msg = 'Reminder sent immediately (appointment within an hour).';
-        } else {
-            dispatch($job)->delay($sendAt->diffInSeconds($now));
-            $msg = 'Reminder scheduled to be sent 1 hour before the appointment.';
-        }
-
-        return redirect()->back()->with('success', $msg);
+        return redirect()->back()->with('success', 'تم إرسال التنبيه! سيظهر الآن في جرس الإشعارات لدى المريض.');
     }
 }

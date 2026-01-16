@@ -9,6 +9,10 @@ use App\Models\Doctor;
 
 class PatientAppointmentController extends Controller
 {
+
+
+
+
     // صفحة لوحة المريض + الحجز
     public function index()
     {
@@ -20,7 +24,11 @@ class PatientAppointmentController extends Controller
         $doctors = Doctor::with('doctorSlots')->get();
 
         return view('patient.dashboard', compact('appointments','doctors'));
+
     }
+
+
+
 
     // حفظ موعد جديد
     public function store(Request $request)
@@ -129,6 +137,9 @@ class PatientAppointmentController extends Controller
 
         return redirect()->back()->with('success', 'تم قبول الموعد المعدل.');
     }
+
+
+
 
 
 }

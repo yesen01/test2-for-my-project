@@ -165,9 +165,12 @@
                             <button class="btn btn-warning btn-sm">Cancel</button>
                         </form>
 
-                        <form action="{{ route('reception.appointments.manual_remind', $appointment) }}" method="POST" class="d-inline">
-                            @csrf
-                            <button class="btn btn-info btn-sm">Manual Remind (1h)</button>
+                        <form action="{{ route('receptionists.appointments.manualRemind', $appointment->id) }}" method="POST" style="display:inline;">
+
+                        @csrf
+                         <button type="submit" class="btn btn-info" style="background-color: #00bcd4; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                            Manual Remind
+                        </button>
                         </form>
 
                         <form action="{{ route('reception.appointments.destroy', $appointment) }}" method="POST" class="d-inline">

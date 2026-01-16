@@ -6,6 +6,59 @@ use App\Http\Controllers\PatientAppointmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Controllers\Admin\AdminReceptionistController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Receptionists\ReceptionistsAppointmentController; // تأكد من وجود هذا السطر في الأعلى
+
+
+
+
+// تأكد أن الرابط يستخدم DashboardController ودالة index
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('patient.dashboard');
+
+Route::post('/reception/appointments/{appointment}/remind', [ReceptionistsAppointmentController::class, 'manualRemind'])
+    ->name('receptionists.appointments.manualRemind');
+
+
+
+Route::post('/forgot-password', function (Request $request) {
+    // 1. التحقق من صحة الإيميل المدخل
+    $request->validate(['email' => 'required|email']);
+
+    // 2. إرسال رابط إعادة التعيين عبر نظام Laravel الأساسي
+    $status = Password::sendResetLink(
+        $request->only('email')
+    );
+
+    // 3. التحقق من حالة الإرسال
+    return $status === Password::RESET_LINK_SENT
+        ? back()->with(['success' => 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني.'])
+        : back()->withErrors(['email' => 'لم نتمكن من العثور على مستخدم بهذا البريد الإلكتروني.']);
+})->name('password.email');
+
+
+
+
+// 1. مسار عرض صفحة "نسيت كلمة المرور"
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->name('password.request');
+
+// 2. مسار استقبال البريد الإلكتروني (الذي تسبب في الخطأ)
+Route::post('/forgot-password', function (Request $request) {
+    // هنا سيتم وضع منطق إرسال الإيميل لاحقاً
+    return back()->with('success', 'إذا كان البريد مسجلاً لدينا، فستصلك رسالة قريباً.');
+})->name('password.email');
+
+
+
+// Receptionist password edit/update routes
+Route::get('/admin/receptionist/{id}/password', [AdminReceptionistController::class, 'editPassword'])->name('admin.receptionist.editPassword');
+Route::put('/admin/receptionist/{id}/password', [AdminReceptionistController::class, 'updatePassword'])->name('admin.receptionist.updatePassword');
+
+
 
 
 Route::middleware(['auth', AdminMiddleware::class])
