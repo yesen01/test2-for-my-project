@@ -16,14 +16,26 @@ class PatientAppointmentController extends Controller
     // صفحة لوحة المريض + الحجز
     public function index()
     {
-        $appointments = Auth::user()
-            ->appointments()
-            ->orderBy('date','asc')
-            ->get();
-        // eager load slots for the dashboard to avoid N+1 when rendering availability
-        $doctors = Doctor::with('doctorSlots')->get();
 
-        return view('patient.dashboard', compact('appointments','doctors'));
+        // جلب الأطباء مع علاقة المواعيد
+    $doctors = \App\Models\Doctor::with('doctorSlots')->get();
+
+    $availability = [];
+
+    foreach ($doctors as $doctor) {
+        foreach ($doctor->doctorSlots as $slot) {
+            // نتحقق إذا كان الموعد أسبوعي (يحتوي على day_of_week)
+            if ($slot->day_of_week !== null) {
+                $availability[$doctor->id][$slot->day_of_week][] = [
+                    'start' => $slot->start_time, // الحقل المخزن في الكنترولر الخاص بك
+                    'end'   => $slot->end_time,   // الحقل المخزن في الكنترولر الخاص بك
+                ];
+            }
+        }
+    }
+
+    // تأكد من إرسال المتغيرين للملف
+    return view('patient.dashboard', compact('doctors', 'availability'));
 
     }
 

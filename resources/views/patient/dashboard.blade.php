@@ -14,7 +14,7 @@ $nowDate = Carbon::now()->toDateString();
 
     <style>
         :root {
-            --accent: #0f766e; /* اللون الزيتي لمركز كيان */
+            --accent: #0f766e;
             --accent-hover: #0d635d;
             --muted: #64748b;
             --bg: #f3f4f6;
@@ -33,7 +33,7 @@ $nowDate = Carbon::now()->toDateString();
             color: #1e293b;
         }
 
-        /* القائمة الجانبية المحدثة */
+        /* Sidebar */
         #sideMenu {
             position: fixed;
             top: 0;
@@ -63,7 +63,6 @@ $nowDate = Carbon::now()->toDateString();
 
         #overlay.show { opacity: 1; pointer-events: auto; }
 
-        /* الأزرار والحقول */
         #menuBtn {
             position: fixed;
             top: 20px;
@@ -130,8 +129,7 @@ $nowDate = Carbon::now()->toDateString();
 
         button.btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
 
-        .msg-success { background: #dcfce7; color: #166534; padding: 15px; border-radius: 12px; margin-bottom: 20px; font-weight: 600; text-align: center; }
-
+        nav ul { list-style:none; padding:0; display:flex; flex-direction:column; gap:10px; }
         nav ul li a {
             display: flex;
             align-items: center;
@@ -143,7 +141,6 @@ $nowDate = Carbon::now()->toDateString();
             font-weight: 600;
             transition: 0.3s;
         }
-
         nav ul li a:hover, nav ul li a.active {
             background: rgba(15, 118, 110, 0.1);
             color: var(--accent);
@@ -160,8 +157,6 @@ $nowDate = Carbon::now()->toDateString();
             cursor: pointer;
             margin-top: 20px;
         }
-
-        @media(max-width: 600px) { .container { margin-top: 80px; } }
     </style>
 </head>
 
@@ -179,7 +174,7 @@ $nowDate = Carbon::now()->toDateString();
     </div>
 
     <nav>
-        <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:10px">
+        <ul>
             <li>
                 <a href="{{ route('patient.dashboard') }}" class="{{ request()->routeIs('patient.dashboard') ? 'active' : '' }}">
                     <i class="fa-solid fa-calendar-plus"></i> حجز موعد
@@ -206,7 +201,9 @@ $nowDate = Carbon::now()->toDateString();
         <h2><i class="fa-solid fa-file-medical" style="margin-left: 10px;"></i>حجز موعد جديد</h2>
 
         @if(session('success'))
-            <div class="msg-success"><i class="fa-solid fa-check-circle"></i> {{ session('success') }}</div>
+            <div class="msg-success" style="background: #dcfce7; color: #166534; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                <i class="fa-solid fa-check-circle"></i> {{ session('success') }}
+            </div>
         @endif
 
         <form method="POST" action="{{ route('patient.dashboard.store') }}" novalidate>
@@ -218,17 +215,12 @@ $nowDate = Carbon::now()->toDateString();
             </div>
 
             <div class="form-row">
-                <label><i class="fa-solid fa-envelope"></i> البريد الإلكتروني</label>
-                <input value="{{ Auth::user()->email }}" readonly>
-            </div>
-
-            <div class="form-row">
                 <label for="doctor_id"><i class="fa-solid fa-stethoscope"></i> اختر الطبيب</label>
                 <select id="doctor_id" name="doctor_id" required>
                     <option value="">-- اضغط للاختيار --</option>
                     @foreach($doctors as $doc)
                         <option value="{{ $doc->id }}" {{ old('doctor_id') == $doc->id ? 'selected' : '' }}>
-                            د. {{ $doc->name }} @isset($doc->specialty) ({{ $doc->specialty }}) @endisset
+                            {{ $doc->name }}
                         </option>
                     @endforeach
                 </select>
@@ -252,8 +244,8 @@ $nowDate = Carbon::now()->toDateString();
             </div>
 
             <div class="form-row">
-                <label for="notes"><i class="fa-solid fa-comment-medical"></i> ملاحظات أو شكوى</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="أدخل أي ملاحظات إضافية هنا...">{{ old('notes') }}</textarea>
+                <label for="notes"><i class="fa-solid fa-comment-medical"></i> ملاحظات</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="أدخل أي ملاحظات إضافية...">{{ old('notes') }}</textarea>
             </div>
 
             <div style="margin-top:25px;">
@@ -267,6 +259,7 @@ $nowDate = Carbon::now()->toDateString();
 </div>
 
 <script>
+    // التحكم في القائمة الجانبية
     function toggleMenu(force) {
         const menu = document.getElementById('sideMenu'), overlay = document.getElementById('overlay');
         const open = typeof force === 'boolean' ? force : !menu.classList.contains('open');
@@ -275,12 +268,11 @@ $nowDate = Carbon::now()->toDateString();
     }
     document.getElementById('menuBtn').addEventListener('click', () => toggleMenu());
 
-    // JS للتعامل مع المواعيد (بقي كما هو مع تحسين المظهر)
+    // نظام المواعيد المحدث
     (function(){
-        // استبدل السطر القديم بهذا السطر
         const availability = @json($availability ?? []);
         const dayLabels = {0:'الأحد',1:'الإثنين',2:'الثلاثاء',3:'الأربعاء',4:'الخميس',5:'الجمعة',6:'السبت'};
-        const daysOrder = [6,0,1,2,3,4,5];
+        const daysOrder = [6,0,1,2,3,4,5]; // يبدأ بالسبت
 
         const doctorSel = document.getElementById('doctor_id');
         const daySel = document.getElementById('day');
@@ -290,12 +282,17 @@ $nowDate = Carbon::now()->toDateString();
             sel.innerHTML = `<option value="">${text}</option>`;
         }
 
+        // عند اختيار الطبيب
         doctorSel.addEventListener('change', function() {
-            if (!this.value) { clearSelect(daySel, 'اختر الطبيب'); return; }
             clearSelect(daySel, 'اختر اليوم');
-            const avail = availability[this.value] || {};
+            clearSelect(timeSel, 'اختر اليوم أولاً');
+
+            const docId = this.value;
+            if (!docId || !availability[docId]) return;
+
+            const docData = availability[docId];
             daysOrder.forEach(dow => {
-                if (avail[dow]) {
+                if (docData[dow]) {
                     const opt = document.createElement('option');
                     opt.value = dow;
                     opt.textContent = dayLabels[dow];
@@ -304,23 +301,31 @@ $nowDate = Carbon::now()->toDateString();
             });
         });
 
+        // عند اختيار اليوم
         daySel.addEventListener('change', function() {
-            const docId = doctorSel.value;
-            if (!docId || !this.value) { clearSelect(timeSel, 'اختر اليوم أولاً'); return; }
             clearSelect(timeSel, 'اختر الساعة');
-            const ranges = availability[docId][this.value] || [];
+            const docId = doctorSel.value;
+            const dow = this.value;
+
+            if (!docId || dow === "" || !availability[docId][dow]) return;
+
+            const ranges = availability[docId][dow];
             ranges.forEach(r => {
-                // توليد الساعات (تبسيط للكود السابق)
                 let start = parseInt(r.start.split(':')[0]);
                 let end = parseInt(r.end.split(':')[0]);
-                for(let i=start; i<=end; i++) {
+
+                for(let i=start; i < end; i++) {
                     const t = i.toString().padStart(2, '0') + ':00';
                     const opt = document.createElement('option');
-                    opt.value = t; opt.textContent = t;
+                    opt.value = t;
+                    opt.textContent = t;
                     timeSel.appendChild(opt);
                 }
             });
         });
+
+        // تشخيص: سيظهر في الـ Console إذا كانت هناك بيانات
+        console.log("بيانات المواعيد القادمة من السيرفر:", availability);
     })();
 </script>
 

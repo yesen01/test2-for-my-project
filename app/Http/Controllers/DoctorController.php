@@ -24,6 +24,9 @@ class DoctorController extends Controller
     {
         $doctors = Doctor::all();
         return view('patient.doctors.index', compact('doctors'));
+
+
+
     }
 
     // Show a doctor's weekly slots

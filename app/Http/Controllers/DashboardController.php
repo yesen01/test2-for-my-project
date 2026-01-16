@@ -15,6 +15,8 @@ class DashboardController extends Controller
     public function index()
     {
 
+
+
         $user = Auth::user();
 
         // 1. جلب المواعيد الخاصة بالمستخدم مع ترتيبها من الأحدث (أو حسب رغبتك)
