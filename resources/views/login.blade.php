@@ -145,6 +145,9 @@
     <div class="register-link">
         ليس لديك حساب؟ <a href="{{ url('/Registration') }}">سجل الآن</a>
     </div>
+
+
+
 </div>
 
 @endsection

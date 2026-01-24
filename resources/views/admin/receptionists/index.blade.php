@@ -105,7 +105,7 @@ body{ background:#f4f6f9; overflow-x:hidden; font-family:Tahoma, sans-serif; mar
                 <th>#</th>
                 <th>الاسم</th>
                 <th>البريد</th>
-                <th>الباسورد</th> {{-- هذا العمود سيحتوي على زر التعديل --}}
+                <th>كلمة المرور</th> {{-- هذا العمود سيحتوي على زر التعديل --}}
                 <th>العمليات</th>
             </tr>
         </thead>

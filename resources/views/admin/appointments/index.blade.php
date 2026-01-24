@@ -116,17 +116,7 @@
 
         <h3 class="mb-3">قائمة المواعيد</h3>
 
-        <div class="mb-4">
-            <h5>الأطباء</h5>
-            <div class="d-flex gap-2 flex-wrap">
-                @foreach($doctors as $doctor)
-                    <button class="btn btn-outline-primary btn-sm show-doctor"
-                            data-doctor-id="{{ $doctor->id }}">
-                        {{ $doctor->name }}
-                    </button>
-                @endforeach
-            </div>
-        </div>
+
 
         <table class="table table-striped">
             <thead>

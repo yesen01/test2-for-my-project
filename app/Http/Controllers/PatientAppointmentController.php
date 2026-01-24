@@ -112,6 +112,16 @@ class PatientAppointmentController extends Controller
     }
 
     return view('patient.edit', compact('appointment'));
+
+
+    $appointmentDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->time);
+
+    if ($appointmentDateTime->isPast()) {
+        return redirect()->route('patient.appointments')
+                         ->with('error', 'عذراً، لا يمكن تعديل موعد قديم أو منتهي.');
+    }
+
+    return view('patient.appointments.edit', compact('appointment'));
 }
 
 

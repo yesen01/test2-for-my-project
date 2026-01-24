@@ -165,7 +165,7 @@
                             <button class="btn btn-warning btn-sm">Cancel</button>
                         </form>
 
-                        <form action="{{ route('receptionists.appointments.manualRemind', $appointment->id) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('reception.appointments.manualRemind', $appointment->id) }}" method="POST" style="display:inline;">
 
                         @csrf
                          <button type="submit" class="btn btn-info" style="background-color: #00bcd4; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">

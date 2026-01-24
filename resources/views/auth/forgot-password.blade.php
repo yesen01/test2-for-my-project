@@ -57,15 +57,51 @@
         font-size: 14px;
         font-weight: bold;
     }
+
+    /* تنسيق رسائل الخطأ والنجاح */
+    .alert {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        text-align: right;
+    }
+    .alert-danger {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+    .alert-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
 </style>
 
 <div class="form-box">
     <h2>استعادة كلمة المرور</h2>
+
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul style="list-style: none; margin: 0; padding: 0;">
+                @foreach($errors->all() as $error)
+                    <li><i class="fa-solid fa-circle-exclamation"></i> {{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+        </div>
+    @endif
+
     <p>أدخل بريدك الإلكتروني وسنرسل لك رابطاً لتعيين كلمة مرور جديدة.</p>
 
     <form action="{{ route('password.email') }}" method="POST">
         @csrf
-        <input type="email" name="email" placeholder="البريد الإلكتروني" required>
+        <input type="email" name="email" placeholder="البريد الإلكتروني" value="{{ old('email') }}" required>
         <button type="submit">إرسال رابط الاستعادة</button>
     </form>
 
