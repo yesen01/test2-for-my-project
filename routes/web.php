@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminPatientController;
 use App\Http\Controllers\Admin\AdminAppointmentController;
 use App\Http\Controllers\Admin\AdminScheduleController;
 use App\Http\Controllers\Receptionists\ReceptionistsAppointmentController;
+use App\Http\Controllers\Receptionists\ReceptionistsDoctorSlotController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -216,9 +217,9 @@ Route::middleware('auth')
         Route::post('/doctors', [AdminDoctorController::class, 'store'])->name('doctors.store');
         Route::delete('/doctors/{doctor}', [AdminDoctorController::class, 'destroy'])->name('doctors.destroy');
         // مسارات فترات عمل الأطباء لموظف الاستقبال
-        Route::get('/doctors/{doctor}/slots', [AdminDoctorSlotController::class, 'index'])->name('doctors.slots.index');
-        Route::post('/doctors/{doctor}/slots', [AdminDoctorSlotController::class, 'store'])->name('doctors.slots.store');
-        Route::delete('/slots/{slot}', [AdminDoctorSlotController::class, 'destroy'])->name('doctors.slots.destroy');
+        Route::get('/doctors/{doctor}/slots', [ReceptionistsDoctorSlotController::class, 'index'])->name('doctors.slots.index');
+        Route::post('/doctors/{doctor}/slots', [ReceptionistsDoctorSlotController::class, 'store'])->name('doctors.slots.store');
+        Route::delete('/slots/{slot}', [ReceptionistsDoctorSlotController::class, 'destroy'])->name('doctors.slots.destroy');
 
         // المرضى (هنا حل المشكلة الحالية)
         Route::get('/patients', [AdminPatientController::class, 'index'])->name('patients.index');
@@ -233,7 +234,6 @@ Route::middleware('auth')
         Route::delete('/appointments/{appointment}', [AdminAppointmentController::class, 'destroy'])->name('appointments.destroy');
 
         Route::get('/schedule', [AdminScheduleController::class, 'index'])->name('schedule.index');
-
 
 
         // التذكير اليدوي

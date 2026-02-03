@@ -80,7 +80,7 @@ body{
     <a href="{{ route('admin.dashboard') }}"
        class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <i class="fa-solid fa-chart-line ms-2"></i>
-        Dashboard
+        لوحة التحكم
     </a>
 
     <a href="{{ route('admin.doctors.index') }}"
@@ -149,64 +149,68 @@ body{
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($patients as $patient)
-                            @php
-                                $doctors = $patient->appointments->pluck('doctor')->filter()->unique('id');
-                            @endphp
+    @forelse($patients as $patient)
+        @php
+            // جلب المواعيد الخاصة بهذا المريض فقط
+            $appointments = $patient->appointments;
+            // جلب الأطباء الفريدين الذين لديهم مواعيد مع هذا المريض
+            $assignedDoctors = $appointments->pluck('doctor')->filter()->unique('id');
+        @endphp
 
-                            @if($doctors->isEmpty())
-                                <tr>
-                                    <td>{{ $patient->id }}</td>
-                                    <td>{{ $patient->name }}</td>
-                                    <td>{{ $patient->email }}</td>
-                                    <td>-</td>
-                                    <td>{{ optional($patient->created_at)->format('Y-m-d') }}</td>
-                                    <td>
-                                        <form method="POST"
-                                              action="{{ route('admin.patients.destroy', $patient) }}"
-                                              onsubmit="return confirm('هل أنت متأكد من حذف المريض؟');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-sm btn-danger">حذف</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @else
-                                @foreach($doctors as $d)
-                                    @php
-                                        $times = $patient->appointments
-                                            ->where('doctor_id', $d->id)
-                                            ->pluck('time')
-                                            ->filter()
-                                            ->unique();
-                                    @endphp
-                                    <tr>
-                                        <td>{{ $patient->id }}</td>
-                                        <td>{{ $patient->name }}</td>
-                                        <td>{{ $patient->email }}</td>
-                                        <td>{{ $d->name ?? '-' }}</td>
-                                        <td>{{ $times->isNotEmpty() ? $times->join(', ') : '-' }}</td>
-                                        <td>{{ optional($patient->created_at)->format('Y-m-d') }}</td>
-                                        <td>
-                                            @if($loop->first)
-                                                <form method="POST"
-                                                      action="{{ route('admin.patients.destroy', $patient) }}"
-                                                      onsubmit="return confirm('هل أنت متأكد من حذف المريض؟');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-sm btn-danger">حذف</button>
-                                                </form>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            @endif
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-muted">لا يوجد مرضى</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
+        @if($assignedDoctors->isEmpty())
+            {{-- حالة المريض الذي ليس لديه أي حجز --}}
+            <tr>
+                <td>{{ $patient->id }}</td>
+                <td>{{ $patient->name }}</td>
+                <td>{{ $patient->email }}</td>
+                <td><span class="text-muted">لا يوجد طبيب</span></td>
+                <td><span class="text-danger">لا يوجد حجز بعد</span></td>
+                <td>{{ optional($patient->created_at)->format('Y-m-d') }}</td>
+                <td>
+                    {{-- تغيير المسار إلى admin --}}
+                    <form method="POST" action="{{ route('admin.patients.destroy', $patient) }}" onsubmit="return confirm('هل أنت متأكد من حذف المريض؟');">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-sm btn-danger">
+                            <i class="fa-solid fa-trash"></i> حذف
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        @else
+            {{-- حالة المريض الذي لديه مواعيد --}}
+            @foreach($assignedDoctors as $d)
+                @php
+                    $times = $appointments->where('doctor_id', $d->id)->pluck('time')->filter()->unique();
+                @endphp
+                <tr>
+                    <td>{{ $patient->id }}</td>
+                    <td>{{ $patient->name }}</td>
+                    <td>{{ $patient->email }}</td>
+                    <td><span class="badge bg-info text-dark">{{ $d->name }}</span></td>
+                    <td>{{ $times->isNotEmpty() ? $times->join(' , ') : '-' }}</td>
+                    <td>{{ optional($patient->created_at)->format('Y-m-d') }}</td>
+                    <td>
+                        @if($loop->first) {{-- عرض زر الحذف مرة واحدة فقط للمريض --}}
+                            {{-- تغيير المسار إلى admin --}}
+                            <form method="POST" action="{{ route('admin.patients.destroy', $patient) }}" onsubmit="return confirm('هل أنت متأكد من حذف المريض؟');">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="fa-solid fa-trash"></i> حذف
+                                </button>
+                            </form>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        @endif
+    @empty
+        <tr>
+            <td colspan="7" class="text-muted p-4 text-center">لا يوجد مرضى مسجلين في النظام</td>
+        </tr>
+    @endforelse
+</tbody>
                 </table>
             </div>
 

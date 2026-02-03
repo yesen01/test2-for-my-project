@@ -82,4 +82,37 @@ class AppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Appointment booked.');
     }
+
+
+    public function destroy(Appointment $appointment)
+{
+    // التأكد من أن الموعد يخص المريض الحالي وليس قديماً
+    if ($appointment->patient_id !== auth()->id()) {
+        abort(403);
+    }
+
+    $appointmentDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->time);
+    if ($appointmentDateTime->isPast()) {
+        return redirect()->back()->with('error', 'لا يمكن إلغاء موعد قديم منتهي.');
+    }
+
+    $appointment->delete();
+
+    return redirect()->route('patient.appointments')->with('success', 'تم إلغاء الحجز بنجاح.');
+}
+
+public function acceptNotification(Appointment $appointment)
+{
+    // التأكد أن الموعد يخص المريض
+    if ($appointment->patient_id !== auth()->id()) {
+        abort(403);
+    }
+
+    // تغيير الحالة إلى مؤكد ليختفي من الإشعارات
+    $appointment->update([
+        'status' => 'confirmed'
+    ]);
+
+    return redirect()->back()->with('success', 'تم تأكيد الموعد وإزالة التنبيه.');
+}
 }

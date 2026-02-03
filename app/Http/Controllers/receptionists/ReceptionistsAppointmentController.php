@@ -12,6 +12,14 @@ use Carbon\Carbon;
 
 class ReceptionistsAppointmentController extends Controller
 {
+
+public function __construct()
+    {
+        // هذا السطر يخبر لارافل: "اسمح فقط للأدمن وموظف الاستقبال"
+        $this->middleware('auth');
+        // إذا كنت تستخدم نظام الأدوار (Spatie أو نظام مخصص):
+        // $this->middleware('role:admin,receptionist');
+    }
     /**
      * عرض قائمة المواعيد والأطباء لموظف الاستقبال
      */
@@ -68,36 +76,49 @@ class ReceptionistsAppointmentController extends Controller
      * حجز موعد جديد نيابة عن مريض
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'patient_id' => 'required|exists:users,id',
-            'doctor_slot_id' => 'required|exists:doctor_slots,id',
-            'date' => 'required|date',
-        ]);
+{
+    $request->validate([
+        'patient_id' => 'required|exists:users,id',
+        'doctor_slot_id' => 'required|exists:doctor_slots,id',
+        'date' => 'required|date',
+    ]);
 
-        $slot = DoctorSlot::findOrFail($request->input('doctor_slot_id'));
-        $dateFormatted = Carbon::parse($request->input('date'))->toDateString();
+    $slot = DoctorSlot::findOrFail($request->input('doctor_slot_id'));
+    $dateFormatted = \Carbon\Carbon::parse($request->input('date'))->toDateString();
 
-        $exists = Appointment::where('doctor_slot_id', $slot->id)
-            ->where('date', $dateFormatted)
-            ->exists();
+    // 1. التحقق من أن هذا "الslot" المحدد لم يحجزه مريض آخر في هذا التاريخ
+    $slotExists = Appointment::where('doctor_slot_id', $slot->id)
+        ->where('date', $dateFormatted)
+        ->where('status', '!=', 'cancelled')
+        ->exists();
 
-        if ($exists) {
-            return redirect()->back()->withErrors(['slot' => 'هذا الموعد محجوز مسبقاً لهذا التاريخ.']);
-        }
-
-        Appointment::create([
-            'user_id' => $request->input('patient_id'),
-            'doctor_id' => $slot->doctor_id,
-            'doctor_slot_id' => $slot->id,
-            'date' => $dateFormatted,
-            'time' => $slot->start_time ?? ($slot->start_at ? $slot->start_at->format('H:i') : $request->input('time')),
-            'status' => 'confirmed', // الموظف يحجز ويؤكد مباشرة
-        ]);
-
-        return redirect()->back()->with('success', 'تم إنشاء الموعد وتأكيده بنجاح.');
+    if ($slotExists) {
+        return redirect()->back()->withErrors(['slot' => 'عذراً، هذا الوقت محجوز مسبقاً لمريض آخر.']);
     }
 
+    // 2. التحقق من أن المريض المختار ليس لديه حجز آخر مع نفس الطبيب في نفس اليوم
+    $patientHasAppointmentToday = Appointment::where('user_id', $request->input('patient_id'))
+        ->where('doctor_id', $slot->doctor_id)
+        ->where('date', $dateFormatted)
+        ->where('status', '!=', 'cancelled')
+        ->exists();
+
+    if ($patientHasAppointmentToday) {
+        return redirect()->back()->withErrors(['patient_id' => 'هذا المريض لديه حجز بالفعل مع هذا الطبيب في نفس اليوم المحدد.']);
+    }
+
+    // إنشاء الموعد وتأكيده
+    Appointment::create([
+        'user_id' => $request->input('patient_id'),
+        'doctor_id' => $slot->doctor_id,
+        'doctor_slot_id' => $slot->id,
+        'date' => $dateFormatted,
+        'time' => $slot->start_time ?? ($slot->start_at ? $slot->start_at->format('H:i') : $request->input('time')),
+        'status' => 'confirmed',
+    ]);
+
+    return redirect()->back()->with('success', 'تم إنشاء الموعد وتأكيده بنجاح.');
+}
     /**
      * قبول/تأكيد الموعد
      */
@@ -166,4 +187,6 @@ class ReceptionistsAppointmentController extends Controller
 
         return redirect()->back()->with('success', 'تم إرسال التنبيه! سيظهر الآن في جرس الإشعارات لدى المريض.');
     }
+
+
 }

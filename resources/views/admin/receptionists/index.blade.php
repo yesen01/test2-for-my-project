@@ -25,7 +25,7 @@ body{ background:#f4f6f9; overflow-x:hidden; font-family:Tahoma, sans-serif; mar
 
     <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <i class="fa-solid fa-chart-line ms-2"></i>
-        Dashboard
+        لوحة التحكم
     </a>
 
     <a href="{{ route('admin.doctors.index') }}" class="{{ request()->routeIs('admin.doctors.*') ? 'active' : '' }}">
@@ -105,7 +105,7 @@ body{ background:#f4f6f9; overflow-x:hidden; font-family:Tahoma, sans-serif; mar
                 <th>#</th>
                 <th>الاسم</th>
                 <th>البريد</th>
-                <th>كلمة المرور</th> {{-- هذا العمود سيحتوي على زر التعديل --}}
+                <th>كلمة المرور</th>
                 <th>العمليات</th>
             </tr>
         </thead>
@@ -116,7 +116,6 @@ body{ background:#f4f6f9; overflow-x:hidden; font-family:Tahoma, sans-serif; mar
                     <td>{{ $r->name }}</td>
                     <td>{{ $r->email }}</td>
                     <td>
-                        {{-- تم تغيير $user->id إلى $r->id ليتناسب مع المتغير في حلقة forelse --}}
                         <a href="{{ route('admin.receptionist.editPassword', $r->id) }}" class="btn btn-sm btn-outline-primary">
                             <i class="fa-solid fa-key ms-1"></i>
                             تعيين كلمة مرور
@@ -135,7 +134,7 @@ body{ background:#f4f6f9; overflow-x:hidden; font-family:Tahoma, sans-serif; mar
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5">لا يوجد موظفون بعد</td> {{-- تم تعديل الـ colspan ليكون 5 --}}
+                    <td colspan="5">لا يوجد موظفون بعد</td>
                 </tr>
             @endforelse
         </tbody>

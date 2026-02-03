@@ -90,7 +90,7 @@ body{
     <a href="{{ route('admin.dashboard') }}"
        class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <i class="fa-solid fa-chart-line ms-2"></i>
-        Dashboard
+        لوحة التحكم
     </a>
 
     <a href="{{ route('admin.doctors.index') }}"

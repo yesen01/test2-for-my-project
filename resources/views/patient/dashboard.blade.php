@@ -198,6 +198,17 @@ $nowDate = Carbon::now()->toDateString();
 
 <div class="container">
     <div class="card">
+        @if($errors->has('error'))
+    <div style="background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+        {{ $errors->first('error') }}
+    </div>
+@endif
+
+@if(session('success'))
+    <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+        {{ session('success') }}
+    </div>
+@endif
         <h2><i class="fa-solid fa-file-medical" style="margin-left: 10px;"></i>حجز موعد جديد</h2>
 
         @if(session('success'))
@@ -243,10 +254,7 @@ $nowDate = Carbon::now()->toDateString();
                 @error('time')<div style="color:var(--danger); font-size:12px; margin-top:5px;">{{ $message }}</div>@enderror
             </div>
 
-            <div class="form-row">
-                <label for="notes"><i class="fa-solid fa-comment-medical"></i> ملاحظات</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="أدخل أي ملاحظات إضافية...">{{ old('notes') }}</textarea>
-            </div>
+
 
             <div style="margin-top:25px;">
                 <button class="btn" type="submit">تأكيد الحجز الآن</button>
@@ -274,28 +282,28 @@ $nowDate = Carbon::now()->toDateString();
         const dayLabels = {0:'الأحد',1:'الإثنين',2:'الثلاثاء',3:'الأربعاء',4:'الخميس',5:'الجمعة',6:'السبت'};
         const daysOrder = [6,0,1,2,3,4,5]; // يبدأ بالسبت
 
-        const doctorSel = document.getElementById('doctor_id');
-        const daySel = document.getElementById('day');
-        const timeSel = document.getElementById('time');
+        const doctorSel = document.getElementById('doctor_id');// اختيار الطبيب
+        const daySel = document.getElementById('day');// اختيار اليوم
+        const timeSel = document.getElementById('time');// اختيار الساعة
 
-        function clearSelect(sel, text) {
-            sel.innerHTML = `<option value="">${text}</option>`;
+        function clearSelect(sel, text) {// دالة لمسح الخيارات
+            sel.innerHTML = `<option value="">${text}</option>`;// إعادة تعيين الخيارات
         }
 
         // عند اختيار الطبيب
-        doctorSel.addEventListener('change', function() {
+        doctorSel.addEventListener('change', function() {// مسح الخيارات السابقة
             clearSelect(daySel, 'اختر اليوم');
             clearSelect(timeSel, 'اختر اليوم أولاً');
 
             const docId = this.value;
-            if (!docId || !availability[docId]) return;
+            if (!docId || !availability[docId]) return;// هذي إذا كان المريض قد اختار الخانة الفارغة ("-- اضغط للاختيار --")، نقوم بإيقاف الكود فوراً
 
             const docData = availability[docId];
-            daysOrder.forEach(dow => {
-                if (docData[dow]) {
+            daysOrder.forEach(dow => {// ترتيب الأيام يلي حددتهن
+                if (docData[dow]) {// إذا كان الطبيب متاح في هذا اليوم
                     const opt = document.createElement('option');
                     opt.value = dow;
-                    opt.textContent = dayLabels[dow];
+                    opt.textContent = dayLabels[dow];// النص الذي يظهر للمستخدم (الأحد، الإثنين...)
                     daySel.appendChild(opt);
                 }
             });
@@ -307,7 +315,7 @@ $nowDate = Carbon::now()->toDateString();
             const docId = doctorSel.value;
             const dow = this.value;
 
-            if (!docId || dow === "" || !availability[docId][dow]) return;
+            if (!docId || dow === "" || !availability[docId][dow]) return;// جلب الفترات الزمنية المتاحة
 
             const ranges = availability[docId][dow];
             ranges.forEach(r => {
@@ -315,10 +323,10 @@ $nowDate = Carbon::now()->toDateString();
                 let end = parseInt(r.end.split(':')[0]);
 
                 for(let i=start; i < end; i++) {
-                    const t = i.toString().padStart(2, '0') + ':00';
+                    const t = i.toString().padStart(2, '0') + ':00';//لو كانت الساعة أقل من 10، نضيف صفر في البداية
                     const opt = document.createElement('option');
-                    opt.value = t;
-                    opt.textContent = t;
+                    opt.value = t;// القيمة التي سترسل إلى السيرفر
+                    opt.textContent = t;// النص الذي يظهر للمستخدم
                     timeSel.appendChild(opt);
                 }
             });

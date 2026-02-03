@@ -3,9 +3,9 @@
 @section('content')
 
 <style>
-    body {
+    body {/* تنسيق خلفية الصفحة بالكامل */
         font-family: Arial, sans-serif;
-        background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ asset("images/background-login.jpg") }}');
+        background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -14,7 +14,7 @@
         align-items: center;
         height: 100vh;
         margin: 0;
-    }
+    }/* تنسيق نموذج التسجيل */
 
     .container {
         background: rgba(255, 255, 255, 0.95);
@@ -24,7 +24,7 @@
         width: 420px;
         text-align: center;
         position: relative; /* ضروري لتموضع زر الرجوع إذا أردته مطلقاً */
-    }
+    }/* تنسيق عنوان النموذج */
 
     /* تنسيق زر الرجوع */
     .back-link {
@@ -38,19 +38,19 @@
         transition: 0.3s;
     }
 
-    .back-link:hover {
+    .back-link:hover {/* تأثير التمرير فوق زر الرجوع */
         color: #0d635d;
         transform: translateX(5px);
     }
 
-    .container h2 {
+    .container h2 {/* تنسيق عنوان النموذج */
         color: #0f766e;
         margin-bottom: 20px;
         font-size: 24px;
         font-weight: bold;
     }
 
-    .container input {
+    .container input {/* تنسيق حقول الإدخال */
         width: 100%;
         padding: 12px;
         margin: 8px 0;
@@ -62,12 +62,12 @@
         transition: 0.3s;
     }
 
-    .container input:focus {
+    .container input:focus {/* تأثير التركيز على حقول الإدخال */
         border-color: #0f766e;
         box-shadow: 0 0 5px rgba(15, 118, 110, 0.3);
     }
 
-    .container button {
+    .container button {/* تنسيق زر الإرسال */
         background: #0f766e;
         color: #fff;
         border: none;
@@ -81,24 +81,24 @@
         transition: 0.3s;
     }
 
-    .container button:hover {
+    .container button:hover {/* تأثير التمرير فوق زر الإرسال */
         background: #0d635d;
         transform: translateY(-2px);
     }
 
-    .container p {
+    .container p {/* تنسيق الفقرة أسفل النموذج */
         margin-top: 15px;
         font-size: 14px;
         color: #555;
     }
 
-    .container p a {
+    .container p a {/* تنسيق رابط تسجيل الدخول */
         color: #0f766e;
         text-decoration: none;
         font-weight: bold;
     }
 
-    .success, .error {
+    .success, .error {/* تنسيق رسائل النجاح والخطأ */
         padding: 10px;
         border-radius: 8px;
         font-size: 13px;
@@ -137,6 +137,7 @@
         @csrf
         <input type="text" name="name" placeholder="الاسم الكامل" required>
         <input type="email" name="email" placeholder="البريد الإلكتروني" required>
+        <input type="text" name= "addres" placeholder="العنوان" required>
         <input type="text" name="phone" placeholder="رقم الهاتف" required>
         <input type="password" name="password" placeholder="كلمة المرور" required>
         <input type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور" required>

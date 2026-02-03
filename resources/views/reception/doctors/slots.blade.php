@@ -1,121 +1,129 @@
-@php
-use Carbon\Carbon;
-$nowDate = Carbon::now()->toDateString();
-@endphp
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>حجز موعد - مركز كيان</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعداد مواعيد الطبيب</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
     <style>
-        :root { --accent: #0f766e; --accent-hover: #0d635d; --bg: #f3f4f6; --card: #ffffff; --danger: #ef4444; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #1e293b; margin: 0; }
-        .container { max-width: 700px; margin: 60px auto; padding: 0 20px; }
-        .card { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
-        h2 { color: var(--accent); text-align: center; }
-        .form-row { margin-bottom: 18px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; }
-        button.btn { background: var(--accent); color: #fff; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        body {
+            background: #f4f6f9;
+            font-family: Tahoma, sans-serif;
+            padding-top: 30px;
+        }
+        /* تم إلغاء الـ Sidebar والاعتماد على حاوية كاملة العرض */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        .card {
+            border-radius: 14px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,.08);
+        }
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .btn-back {
+            background-color: #fff;
+            color: #0f766e;
+            border: 2px solid #0f766e;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-back:hover {
+            background-color: #0f766e;
+            color: #fff;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <div class="card">
-        <h2>حجز موعد جديد</h2>
+<div class="main-container">
 
-        <form method="POST" action="{{ route('patient.dashboard.store') }}">
-            @csrf
+    <div class="header-section">
+        <h4 class="mb-0">
+            <i class="fa-solid fa-calendar-day text-success me-2"></i>
+            مواعيد الطبيب: <span class="text-success">{{ $doctor->name }}</span>
+        </h4>
 
-            <div class="form-row">
-                <label>اختر الطبيب</label>
-                <select id="doctor_id" name="doctor_id" required>
-                    <option value="">-- اختر طبيباً --</option>
-                    @foreach($doctors as $doc)
-                        <option value="{{ $doc->id }}">{{ $doc->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+        <a href="{{ route('reception.doctors.index') }}" class="btn btn-back">
+            <i class="fa-solid fa-chevron-right ms-2"></i>
+            رجوع لقائمة الأطباء
+        </a>
+    </div>
 
-            <div class="form-row">
-                <label>اليوم المتاح</label>
-                <select id="day" name="day" required>
-                    <option value="">اختر الطبيب أولاً</option>
-                </select>
-            </div>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-check-circle me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
-            <div class="form-row">
-                <label>الساعة</label>
-                <select id="time" name="time" required>
-                    <option value="">اختر اليوم أولاً</option>
-                </select>
-            </div>
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <h6 class="fw-bold mb-4 text-secondary">
+                <i class="fa-solid fa-clock-rotate-left me-2"></i>
+                إعداد الجدول الأسبوعي (من السبت إلى الجمعة)
+            </h6>
 
-            <button class="btn" type="submit">تأكيد الحجز</button>
-        </form>
+            <form method="POST" action="{{ route('reception.doctors.slots.store', $doctor) }}">
+                @csrf
+
+                @php
+                    $weekly = $slots->filter(function($s){ return !is_null($s->day_of_week); })->keyBy('day_of_week');
+                    $daysOrder = [6=>'السبت', 0=>'الأحد', 1=>'الإثنين', 2=>'الثلاثاء', 3=>'الأربعاء', 4=>'الخميس', 5=>'الجمعة'];
+                @endphp
+
+                <div class="table-responsive">
+                    <table class="table table-hover text-center align-middle mb-4">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 15%;">اليوم</th>
+                                <th style="width: 10%;">نشط</th>
+                                <th>وقت البداية</th>
+                                <th>وقت النهاية</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($daysOrder as $dow => $label)
+                                @php $exist = $weekly->has($dow) ? $weekly->get($dow) : null; @endphp
+                                <tr>
+                                    <td class="fw-bold">{{ $label }}</td>
+                                    <td>
+                                        <input type="hidden" name="days[{{ $dow }}][enabled]" value="0">
+                                        <input class="form-check-input" type="checkbox" name="days[{{ $dow }}][enabled]" value="1" {{ $exist ? 'checked' : '' }} style="width: 1.5em; height: 1.5em; cursor:pointer;">
+                                    </td>
+                                    <td>
+                                        <input type="time" name="days[{{ $dow }}][start_time]" class="form-control" value="{{ old('days.'.$dow.'.start_time', $exist?->start_time) }}">
+                                    </td>
+                                    <td>
+                                        <input type="time" name="days[{{ $dow }}][end_time]" class="form-control" value="{{ old('days.'.$dow.'.end_time', $exist?->end_time) }}">
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex border-top pt-3">
+                    <button type="submit" class="btn btn-success btn-lg px-5 ms-auto shadow-sm">
+                        <i class="fa-solid fa-floppy-disk ms-2"></i> حفظ الجدول الأسبوعي
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<script>
-    (function(){
-        // جلب البيانات التي جهزناها في الـ Controller
-        const availability = @json($availability ?? []);
-        const dayLabels = {0:'الأحد',1:'الإثنين',2:'الثلاثاء',3:'الأربعاء',4:'الخميس',5:'الجمعة',6:'السبت'};
-        const daysOrder = [6,0,1,2,3,4,5]; // يبدأ من السبت كما في الـ Admin
-
-        const doctorSel = document.getElementById('doctor_id');
-        const daySel = document.getElementById('day');
-        const timeSel = document.getElementById('time');
-
-        function clearSelect(sel, text) {
-            sel.innerHTML = `<option value="">${text}</option>`;
-        }
-
-        doctorSel.addEventListener('change', function() {
-            clearSelect(daySel, 'اختر اليوم');
-            clearSelect(timeSel, 'اختر اليوم أولاً');
-            const docId = this.value;
-            if (!docId || !availability[docId]) return;
-
-            daysOrder.forEach(dow => {
-                if (availability[docId][dow]) {
-                    const opt = document.createElement('option');
-                    opt.value = dow;
-                    opt.textContent = dayLabels[dow];
-                    daySel.appendChild(opt);
-                }
-            });
-        });
-
-        daySel.addEventListener('change', function() {
-            clearSelect(timeSel, 'اختر الساعة');
-            const docId = doctorSel.value;
-            const dow = this.value;
-            if (!docId || dow === "" || !availability[docId][dow]) return;
-
-            availability[docId][dow].forEach(slot => {
-                // تقسيم الوقت (مثلاً 09:00 إلى 9)
-                let start = parseInt(slot.start.split(':')[0]);
-                let end = parseInt(slot.end.split(':')[0]);
-
-                for(let i = start; i < end; i++) {
-                    const t = i.toString().padStart(2, '0') + ':00';
-                    const opt = document.createElement('option');
-                    opt.value = t;
-                    opt.textContent = t;
-                    timeSel.appendChild(opt);
-                }
-            });
-        });
-
-        // سطر للتأكد في الـ Console
-        console.log("البيانات المحملة:", availability);
-    })();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -213,24 +213,27 @@
                     <div class="notif-header">التنبيهات</div>
                     <div class="notif-body">
                         @forelse($notifs as $notif)
-                            <div class="notif-item">
-                                @if($notif->status === 'reminded')
-                                    <i class="fa-solid fa-clock-rotate-left" style="color: var(--accent)"></i>
-                                    <div>
-                                        <strong>تذكير بالموعد</strong>
-                                        <p>نذكرك بموعدك القادم في {{ $notif->date }} الساعة {{ $notif->time }}</p>
-                                    </div>
-                                @else
-                                    <i class="fa-solid fa-calendar-day" style="color: var(--warning)"></i>
-                                    <div>
-                                        <strong>تعديل موعد</strong>
-                                        <p>تم اقتراح موعد جديد: {{ $notif->date }} الساعة {{ $notif->time }}</p>
-                                    </div>
-                                @endif
+                <form action="{{ route('patient.appointments.accept', $notif->id) }}" method="POST" id="accept-notif-{{ $notif->id }}">
+                    @csrf
+                    <a href="javascript:void(0)" onclick="document.getElementById('accept-notif-{{ $notif->id }}').submit();" class="notif-item">
+                        @if($notif->status === 'reminded')
+                            <i class="fa-solid fa-clock-rotate-left" style="color: var(--accent)"></i>
+                            <div>
+                                <strong>تذكير بالموعد</strong>
+                                <p>نذكرك بموعدك القادم في {{ $notif->date }} الساعة {{ $notif->time }}</p>
                             </div>
-                        @empty
-                            <div class="notif-empty">لا توجد تنبيهات جديدة</div>
-                        @endforelse
+                        @else
+                            <i class="fa-solid fa-calendar-day" style="color: var(--warning)"></i>
+                            <div>
+                                <strong>تعديل موعد</strong>
+                                <p>تم اقتراح موعد جديد: {{ $notif->date }} الساعة {{ $notif->time }}</p>
+                            </div>
+                        @endif
+                    </a>
+                </form>
+                @empty
+                <div class="notif-empty">لا توجد تنبيهات جديدة</div>
+                @endforelse
                     </div>
                 </div>
             </div>
@@ -242,16 +245,19 @@
                 <div class="dropdown-fixed">
                     <a href="{{ route('patient.dashboard') }}"><i class="fa-solid fa-plus"></i> حجز موعد جديد</a>
                     <hr style="margin: 5px 0; border: 0; border-top: 1px solid #eee;">
+
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" style="color: var(--danger); font-weight: bold;">
                            <i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج
                         </button>
                     </form>
+
                 </div>
             </div>
         </div>
     </header>
+
 
     <div class="container">
         <h1>📅 مواعيدي</h1>
@@ -266,8 +272,8 @@
                 @foreach($appointments as $appointment)
     @php
         // دمج التاريخ والوقت في كائن واحد للمقارنة
-        $appointmentDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->time);
-        $isPast = $appointmentDateTime->isPast();
+        $appointmentDateTime = \Carbon\Carbon::parse($appointment->date . ' ' . $appointment->time);//إنشاء كائن تاريخ ووقت من تاريخ ووقت الموعد//
+        $isPast = $appointmentDateTime->isPast();//تحقق مما إذا كان الموعد قد مضى//
     @endphp
 
     <div class="appt" style="{{ $isPast ? 'opacity: 0.7; background: #f9fafb;' : '' }}">
@@ -279,11 +285,19 @@
                 <button class="menu-btn appt-menu-trigger">
                     <i class="fa-solid fa-ellipsis-vertical"></i>
                 </button>
+
                 <div class="dropdown-appt">
                     <a href="{{ route('patient.appointments.edit', $appointment) }}">
                         <i class="fa-solid fa-pen-to-square"></i> تعديل الموعد
                     </a>
-                    {{-- ... باقي أزرار الحذف والتأكيد ... --}}
+                    <form action="{{ route('patient.appointments.destroy', $appointment) }}" method="POST"
+                  onsubmit="return confirm('هل أنت متأكد من حذف هذا الموعد نهائياً؟');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" style="color: var(--danger); width: 100%; border-top: 1px solid #f1f5f9;">
+                    <i class="fa-solid fa-trash-can"></i> حذف الموعد
+                </button>
+            </form>
                 </div>
             </div>
         </div>

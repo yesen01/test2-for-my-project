@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Receptionists;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Models\DoctorSlot;
 
-class AdminDoctorSlotController extends Controller
+class ReceptionistsDoctorSlotController extends Controller
 {
     public function index(Doctor $doctor)
     {
         $slots = $doctor->doctorSlots()->orderBy('day_of_week')->orderBy('start_time')->get();
-        return view('admin.doctors.slots', compact('doctor','slots'));
+        return view('reception.doctors.slots', compact('doctor','slots'));
 
     }
 

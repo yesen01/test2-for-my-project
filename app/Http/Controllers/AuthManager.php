@@ -29,12 +29,12 @@ class AuthManager extends Controller
 
     if (!$user) {
         // الايميل مش موجود
-        return redirect()->route('login')->with('error', '   uncroect email ');
+        return redirect()->route('login')->with('error', '   بريد إلكتروني غير صحيح ');
     }
 
     // تحقق من الباسورد
     if (!Hash::check($req->password, $user->password)) {
-        return redirect()->route('login')->with('error', 'uncroect password ');
+        return redirect()->route('login')->with('error', 'كلمة مرور خاطئة ');
     }
 
     // تسجيل الدخول
@@ -57,38 +57,40 @@ class AuthManager extends Controller
 
     }
 
-    function RegistrationPost(Request $req)
-    {
-        $req->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed'
-        ]);
+function RegistrationPost(Request $req)
+{
+    $req->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users',
+        'addres' => 'required', // إضافة التحقق من العنوان هنا
+        'password' => 'required|confirmed'
+    ]);
 
-        $data['name'] = $req->name;
-        $data['email'] = $req->email;
-        $data['password'] = Hash::make($req->password);
-        $data['role'] = 'patient';
+    $data['name'] = $req->name;
+    $data['email'] = $req->email;
+    $data['addres'] = $req->addres; // السطر المسؤول عن جلب العنوان من الفورم وتخزينه
+    $data['password'] = Hash::make($req->password);
+    $data['role'] = 'patient';
 
-        $user = User::create($data);
+    $user = User::create($data);
 
-        if (! $user) {
-            if ($req->expectsJson()) {
-                return response()->json(['message' => 'Registration failed'], 500);
-            }
-            return redirect()->route('registration')->with('error', 'Registration failed, try again');
-        }
-
-        // If request expects JSON (AJAX), return JSON response
+    if (! $user) {
         if ($req->expectsJson()) {
-            return response()->json([
-                'message' => 'You have registered successfully',
-                'token' => null,
-            ], 201);
+            return response()->json(['message' => 'Registration failed'], 500);
         }
-
-        return redirect()->route('login')->with('success', 'You have registered successfully');
+        return redirect()->route('registration')->with('error', 'Registration failed, try again');
     }
+
+    // If request expects JSON (AJAX), return JSON response
+    if ($req->expectsJson()) {
+        return response()->json([
+            'message' => 'You have registered successfully',
+            'token' => null,
+        ], 201);
+    }
+
+    return redirect()->route('login')->with('success', 'You have registered successfully');
+}
 
     function logout()
     {

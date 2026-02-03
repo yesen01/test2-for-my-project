@@ -63,7 +63,7 @@ body{
     <h4>مركز كيان لطب وجراحة الاسنان </h4>
 
     <a href="{{ route('admin.dashboard') }}">
-        <i class="fa-solid fa-chart-line ms-2"></i> Dashboard
+        <i class="fa-solid fa-chart-line ms-2"></i> لوحة التحكم
     </a>
 
     <a href="{{ route('admin.doctors.index') }}" class="active">
