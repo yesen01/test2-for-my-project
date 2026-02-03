@@ -286,3 +286,8 @@ Route::middleware('auth')->group(function () {
 */
 Route::get('/doctors', [DoctorController::class, 'index'])->name('patient.doctors.index');
 Route::get('/doctor-times/{doctor}', [DoctorController::class, 'times']);
+
+// Simple healthcheck endpoint used by Render and other health probes
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok']);
+});

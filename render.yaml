@@ -1,0 +1,41 @@
+# Render blueprint for deploying Laravel (Docker) with Aiven MySQL
+# Replace placeholder values or add secrets in the Render dashboard/CLI.
+services:
+  - type: web
+    name: laravel-app
+    env: docker
+    region: ord
+    plan: starter
+    docker:
+      dockerfilePath: ./Dockerfile
+    startCommand: /entrypoint.sh
+    healthCheckPath: /health
+    healthCheckIntervalSeconds: 10
+    healthCheckTimeoutSeconds: 5
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        # Create this as a secret in Render if you need to protect it
+        value: ""
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: "<AIVEN_HOST>"
+      - key: DB_PORT
+        value: "<AIVEN_PORT>"
+      - key: DB_DATABASE
+        value: "<AIVEN_DB>"
+      - key: DB_USERNAME
+        value: "<AIVEN_USER>"
+      - key: DB_PASSWORD
+        value: "<AIVEN_PASSWORD>"
+      - key: MYSQL_ATTR_SSL_CA
+        # Points to CA we copied into the image; set this env var so PDO can verify Aiven's TLS certificate
+        value: /etc/ssl/certs/aiven-ca.pem
+
+# Notes:
+# - Mark DB_PASSWORD and APP_KEY as secrets in the Render dashboard for best security.
+# - If you prefer not to commit the CA bundle to your repo, upload it as a file to your Render service or point MYSQL_ATTR_SSL_CA to a mounted path/secret volume.
